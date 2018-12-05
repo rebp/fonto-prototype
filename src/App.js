@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import {
 	App,
@@ -20,7 +22,10 @@ import {
 } from 'fds/components';
 
 class Header extends Component {
-	state = { activeTab: 'start' };
+	state = {
+		activeTab: 'start',
+		offline: false
+	};
 
 	handleClick = () =>
 		console.log('button clicked, generally you would setState to switch tabs or run an action');
@@ -29,7 +34,6 @@ class Header extends Component {
 		<Drop>
 			<Menu>
 				<MenuItem label="Menu item" onClick={this.handleClick} />
-
 				<MenuItem label="Menu item" onClick={this.handleClick} />
 			</Menu>
 		</Drop>
@@ -64,8 +68,22 @@ class Header extends Component {
 		</Drop>
 	);
 
+	checkNetworkStatus = () => {
+		if (navigator.onLine === false) {
+			navigator.serviceWorker.controller.postMessage("offline");
+			this.setState({ offline: false })	
+			toast("Offline");
+		} else {
+			navigator.serviceWorker.controller.postMessage("online");
+			this.setState({ offline: true })
+			toast.success("Online");
+		}
+	}
+
 	render() {
 		const { activeTab } = this.state;
+
+		console.log("Offline: "+this.state.offline);
 
 		return (
 			<App>
@@ -101,7 +119,7 @@ class Header extends Component {
 					<MastheadToolbars>
 						<MastheadToolbar>
 							<MastheadToolbarButtons>
-								<Button label="Toolbar button" onClick={this.handleClick} />
+								<Button label="Toolbar button" isDisabled={!this.state.offline} onClick={this.handleClick} />
 
 								<ButtonWithDrop
 									label="Drop button"
@@ -122,9 +140,25 @@ class Header extends Component {
 					</MastheadToolbars>
 				</Masthead>
 				<Flex flex="1" flexDirection="column">Page body content</Flex>
+				<ToastContainer
+					position="bottom-right"
+					autoClose={false}
+					newestOnTop={false}
+					closeOnClick
+					rtl={true}
+					pauseOnVisibilityChange={false}
+					draggable={false}
+				/>
 			</App>
 		);
 	}
+
+	componentDidMount = () => {
+		setInterval(() => {
+			this.checkNetworkStatus()
+		}, 2000);
+	}
+
 }
 
 export default Header;
