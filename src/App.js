@@ -24,7 +24,7 @@ import {
 class Header extends Component {
 	state = {
 		activeTab: 'start',
-		offline: false
+		status: "online" 
 	};
 
 	handleClick = () =>
@@ -69,21 +69,31 @@ class Header extends Component {
 	);
 
 	checkNetworkStatus = () => {
-		if (navigator.onLine === false) {
-			navigator.serviceWorker.controller.postMessage("offline");
-			this.setState({ offline: false })	
-			toast("Offline");
-		} else {
+		window.addEventListener('online', e => {
 			navigator.serviceWorker.controller.postMessage("online");
-			this.setState({ offline: true })
-			toast.success("Online");
-		}
+			this.setState({ status: e.type })
+			toast.info("Online", {
+				position: "bottom-right",
+				autoClose: 5000,
+				hideProgressBar: true,
+				closeOnClick: true
+			});
+		} );
+		
+		window.addEventListener('offline', e => {
+			navigator.serviceWorker.controller.postMessage("offline");
+			this.setState({ status: e.type })
+			toast.error("Offline", {
+				position: "bottom-right",
+				autoClose: 5000,
+				hideProgressBar: true,
+				closeOnClick: true
+			});
+		} );
 	}
 
 	render() {
 		const { activeTab } = this.state;
-
-		console.log("Offline: "+this.state.offline);
 
 		return (
 			<App>
@@ -119,7 +129,7 @@ class Header extends Component {
 					<MastheadToolbars>
 						<MastheadToolbar>
 							<MastheadToolbarButtons>
-								<Button label="Toolbar button" isDisabled={!this.state.offline} onClick={this.handleClick} />
+								<Button label="Toolbar button" isDisabled={this.state.status === "online" ? false : true } onClick={this.handleClick} />
 
 								<ButtonWithDrop
 									label="Drop button"
@@ -140,23 +150,13 @@ class Header extends Component {
 					</MastheadToolbars>
 				</Masthead>
 				<Flex flex="1" flexDirection="column">Page body content</Flex>
-				<ToastContainer
-					position="bottom-right"
-					autoClose={false}
-					newestOnTop={false}
-					closeOnClick
-					rtl={true}
-					pauseOnVisibilityChange={false}
-					draggable={false}
-				/>
+				<ToastContainer/>
 			</App>
 		);
 	}
 
 	componentDidMount = () => {
-		setInterval(() => {
-			this.checkNetworkStatus()
-		}, 2000);
+		this.checkNetworkStatus()
 	}
 
 }
