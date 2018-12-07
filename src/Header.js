@@ -25,18 +25,17 @@ class Header extends Component {
 	renderDrop = () => (
 		<Drop>
 			<Menu>
-				<MenuItem label="Heading 1" onClick={() => this.props.headerOneBlockType("header-one")} />
-				<MenuItem label="Heading 2" onClick={() => this.props.headerTwoBlockType("header-two")} />
-				<MenuItem label="Heading 3" onClick={() => this.props.headerThreeBlockType("header-three")} />
-				<MenuItem label="Heading 4" onClick={() => this.props.headerFourBlockType("header-four")} />
-				<MenuItem label="Heading 5" onClick={() => this.props.headerFiveBlockType("header-five")} />
+				<MenuItem label="Heading 1" onClick={() => this.props.headerBlockType("header-one")} />
+				<MenuItem label="Heading 2" onClick={() => this.props.headerBlockType("header-two")} />
+				<MenuItem label="Heading 3" onClick={() => this.props.headerBlockType("header-three")} />
+				<MenuItem label="Heading 4" onClick={() => this.props.headerBlockType("header-four")} />
+				<MenuItem label="Heading 5" onClick={() => this.props.headerBlockType("header-five")} />
 			</Menu>
 		</Drop>
 	);
 
 	render() {
-
-		const { status, spellCheck, toggleSpellCheck, makeBold, makeItalic, makeUnderline } = this.props;
+		const { status, spellCheck, toggleSpellCheck, toggleInlineStyle } = this.props;
 
 		return (
 			<Masthead>
@@ -67,9 +66,9 @@ class Header extends Component {
 						</MastheadToolbarButtons>
 
 						<MastheadToolbarButtons>
-							<Button icon="bold" onClick={makeBold} />
-							<Button icon="italic" onClick={makeItalic} />
-							<Button icon="underline" onClick={makeUnderline} />
+							<Button icon="bold" onClick={() => toggleInlineStyle("BOLD")} />
+							<Button icon="italic" onClick={() => toggleInlineStyle("ITALIC")} />
+							<Button icon="underline" onClick={() => toggleInlineStyle("UNDERLINE")} />
 						</MastheadToolbarButtons>
 					</MastheadToolbar>
 					<MastheadAlignRight>

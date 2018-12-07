@@ -9,14 +9,14 @@ import {
 	ModalFooter,
 	ModalHeader,
 	Text,
-	Label, 
+	Label,
 	UnorderedList,
 	UnorderedListItem
 } from 'fds/components';
 
-import { 
-	applyCss, 
-	marginBottom 
+import {
+	applyCss,
+	marginBottom
 } from 'fds/system';
 
 const styles = applyCss({
@@ -25,7 +25,7 @@ const styles = applyCss({
 	left: 0,
 	right: 0,
 	top: 0,
-	zIndex: 2
+	zIndex: 10000
 });
 
 
@@ -33,7 +33,7 @@ const styles = applyCss({
 class OfflineModal extends Component {
 
 
-	handleButtonClick = () => this.props.togglemodal();
+	handleButtonClick = () => this.props.toggleModal();
 
 	render() {
 

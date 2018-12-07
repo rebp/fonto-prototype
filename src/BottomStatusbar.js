@@ -36,7 +36,7 @@ class BottomStatusbar extends Component {
 			</PopoverBody>
 
 			<PopoverFooter>
-				<Button type="primary" label="More info" />
+				<Button type="primary" label="More info" onClick={this.props.toggleModal} />
 				<Button type="primary" label="Close" onClick={togglePopover} />
 			</PopoverFooter>
 		</Popover>

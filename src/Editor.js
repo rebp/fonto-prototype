@@ -16,13 +16,18 @@ import {
 	Text
 } from 'fds/components';
 
+import { applyCss } from 'fds/system';
+
 const styles = {
-	editor: {
-		height: '800px',
+	editor: applyCss({
+		padding: '4rem',
 		width: '60%',
 		margin: '0 auto',
-		boxShadow: '0px 0px 10px 1px rgba(52, 73, 94, .5)'
-	}
+		boxShadow: '0px 0px 10px 1px rgba(52, 73, 94, .5)',
+		'& .public-DraftEditor-content': {
+			minHeight: '100px'
+		}
+	})
 };
 
 class EditorPrototype extends Component {
@@ -50,13 +55,13 @@ class EditorPrototype extends Component {
 		});
 	}
 
-	offlineToastRenderer = () => (
+	offlineToastRenderer = ({ closeToast }) => (
 		<Block spaceHorizontalSize="m">
 			<Text colorName="app-background" >Offline</Text>
 			<TextLink
 				colorName="app-background"
 				label="Click here for more info"
-				onClick={() => this.toggleModal()} />
+				onClick={() => { this.toggleModal(); closeToast(); }} />
 		</Block>
 	)
 
@@ -68,16 +73,14 @@ class EditorPrototype extends Component {
 			autoClose: 5000,
 			hideProgressBar: true,
 			closeOnClick: true,
-			toastId: 2
+			toastId: 1
 		});
 	}
 
 
 	checkNetworkStatus = () => {
 
-		if (navigator.onLine) {
-			this.sendOnlineToast()
-		} else {
+		if (!navigator.onLine) {
 			this.sendOfflineToast()
 			this.setState({ spellCheck: false })
 		}
@@ -102,38 +105,13 @@ class EditorPrototype extends Component {
 
 	onChange = (editorState) => this.setState({ editorState });
 
-	makeBold = () => {
-		this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, "BOLD"))
+	toggleInlineStyle = (inlineStyle) => {
+		this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, inlineStyle))
 	}
 
-	makeItalic = () => {
-		this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, "ITALIC"))
+	headerBlockType = (blockType) => {
+		this.onChange(RichUtils.toggleBlockType(this.state.editorState, blockType))
 	}
-
-	makeUnderline = () => {
-		this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, "UNDERLINE"))
-	}
-
-	headerOneBlockType = () => {
-		this.onChange(RichUtils.toggleBlockType(this.state.editorState, "header-one"))
-	}
-
-	headerTwoBlockType = () => {
-		this.onChange(RichUtils.toggleBlockType(this.state.editorState, "header-two"))
-	}
-
-	headerThreeBlockType = () => {
-		this.onChange(RichUtils.toggleBlockType(this.state.editorState, "header-three"))
-	}
-
-	headerFourBlockType = () => {
-		this.onChange(RichUtils.toggleBlockType(this.state.editorState, "header-four"))
-	}
-
-	headerFiveBlockType = () => {
-		this.onChange(RichUtils.toggleBlockType(this.state.editorState, "header-five"))
-	}
-
 
 	render() {
 
@@ -142,19 +120,13 @@ class EditorPrototype extends Component {
 		return (
 			<App>
 				<Header status={status}
-					makeBold={this.makeBold}
-					makeItalic={this.makeItalic}
-					makeUnderline={this.makeUnderline}
+					toggleInlineStyle={this.toggleInlineStyle}
 					spellCheck={spellCheck}
 					toggleSpellCheck={this.toggleSpellCheck}
-					headerOneBlockType={this.headerOneBlockType}
-					headerTwoeBlockType={this.headerTwoeBlockType}
-					headerThreeBlockType={this.headerThreeBlockType}
-					headerFourBlockType={this.headerFourBlockType}
-					headerFiveBlockType={this.headerFiveBlockType}
+					headerBlockType={this.headerBlockType}
 				/>
 				<Flex flex="1" flexDirection="column" paddingSize="l">
-					<div style={styles.editor} onClick={this.focusEditor}>
+					<div {...styles.editor}>
 						<Editor
 							ref={this.setEditor}
 							editorState={editorState}
@@ -163,9 +135,9 @@ class EditorPrototype extends Component {
 						/>
 					</div>
 				</Flex>
-				<BottomStatusbar status={status} />
+				<BottomStatusbar status={status} toggleModal={this.toggleModal} />
 				<ToastContainer />
-				{this.state.isModalOpen && <Modal togglemodal={this.toggleModal} />}
+				{this.state.isModalOpen && <Modal toggleModal={this.toggleModal} />}
 			</App>
 		);
 	}
