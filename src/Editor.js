@@ -60,12 +60,6 @@ class EditorPrototype extends Component {
 
 	onChange = (editorState) => this.setState({ editorState });
 
-	focusEditor = () => {
-		if (this.editor) {
-			this.editor.focus();
-		}
-	};
-
 	makeBold = () => {
 		this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, "BOLD"))
 	}
@@ -105,7 +99,6 @@ class EditorPrototype extends Component {
 
 	componentDidMount = () => {
 		this.checkNetworkStatus()
-		this.focusEditor();
 	}
 
 }
