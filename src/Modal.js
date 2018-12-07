@@ -8,34 +8,54 @@ import {
 	ModalContent,
 	ModalFooter,
 	ModalHeader,
-	Text
+	Text,
+	Label, 
+	UnorderedList,
+	UnorderedListItem
 } from 'fds/components';
+
+import { 
+	applyCss, 
+	marginBottom 
+} from 'fds/system';
+
+const styles = applyCss({
+	position: 'fixed',
+	bottom: 0,
+	left: 0,
+	right: 0,
+	top: 0,
+	zIndex: 2
+});
 
 
 
 class OfflineModal extends Component {
 
 
-	handleButtonClick = () => console.log('Button clicked.');
+	handleButtonClick = () => this.props.togglemodal();
 
 	render() {
+
 		return (
-			<Block applyCss={{ transform: 'translate3D(0, 0, 0)' }} flex="1">
-				<Modal size="m" isFullHeight>
-					<ModalHeader title="Test modal" />
+			<Block applyCss={{ transform: 'translate3D(0, 0, 0)' }} flex="1" {...styles}>
+				<Modal size="s" isFullHeight>
+					<ModalHeader title="Offline infromation" />
 
 					<ModalBody>
 						<ModalContent flexDirection="column" paddingSize="l">
-							<Text>
-								Donec sollicitudin molestie malesuada. Sed porttitor lectus nibh. Quisque velit nisi, pretium ut lacinia in, elementum id enim. Proin eget tortor risus. Nulla porttitor accumsan tincidunt. Proin eget tortor risus. Vivamus suscipit tortor eget felis porttitor volutpat.
-							</Text>
+							<Text marginBottom="m" >The following features won't work while being offline</Text>
+							<UnorderedList>
+								<UnorderedListItem>
+									<Label isBold={true}>Spell Checker</Label>
+								</UnorderedListItem>
+							</UnorderedList>
 
 						</ModalContent>
 					</ModalBody>
 
 					<ModalFooter>
-						<Button label="Cancel" onClick={this.handleButtonClick} />
-						<Button label="Ok" onClick={this.handleButtonClick} type="primary" />
+						<Button label="Close" onClick={this.handleButtonClick} type="primary" />
 					</ModalFooter>
 				</Modal>
 			</Block>
