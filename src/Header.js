@@ -2,11 +2,11 @@ import React, { Component } from 'react';
 
 import {
 	Drop,
+	DropButton,
 	Masthead,
 	MastheadAlignRight,
 	Button,
 	MastheadContent,
-	ButtonWithDrop,
 	MastheadTabButtons,
 	MenuItem,
 	FontoLogo,
@@ -22,14 +22,24 @@ class Header extends Component {
 		//
 	}
 
+	renderButton = ({ isDropOpened, toggleDrop }) => (
+		<Button
+			onClick={toggleDrop}
+			label="Headings"
+			icon="header"
+			iconAfter={isDropOpened ? 'angle-up' : 'angle-down'}
+			isSelected={isDropOpened || this.props.currentBlockType.startsWith("header-")}
+		/>
+	);
+
 	renderDrop = () => (
 		<Drop>
 			<Menu>
-				<MenuItem label="Heading 1" onClick={() => this.props.headerBlockType("header-one")} />
-				<MenuItem label="Heading 2" onClick={() => this.props.headerBlockType("header-two")} />
-				<MenuItem label="Heading 3" onClick={() => this.props.headerBlockType("header-three")} />
-				<MenuItem label="Heading 4" onClick={() => this.props.headerBlockType("header-four")} />
-				<MenuItem label="Heading 5" onClick={() => this.props.headerBlockType("header-five")} />
+				<MenuItem label="Heading 1" isSelected={this.props.currentBlockType === "header-one"} onClick={() => this.props.headerBlockType("header-one")} />
+				<MenuItem label="Heading 2" isSelected={this.props.currentBlockType === "header-two"} onClick={() => this.props.headerBlockType("header-two")} />
+				<MenuItem label="Heading 3" isSelected={this.props.currentBlockType === "header-three"} onClick={() => this.props.headerBlockType("header-three")} />
+				<MenuItem label="Heading 4" isSelected={this.props.currentBlockType === "header-four"} onClick={() => this.props.headerBlockType("header-four")} />
+				<MenuItem label="Heading 5" isSelected={this.props.currentBlockType === "header-five"} onClick={() => this.props.headerBlockType("header-five")} />
 			</Menu>
 		</Drop>
 	);
@@ -58,17 +68,18 @@ class Header extends Component {
 				<MastheadToolbars>
 					<MastheadToolbar>
 						<MastheadToolbarButtons>
-							<ButtonWithDrop
+							<DropButton
 								label="Headings"
 								icon="header"
 								renderDrop={this.renderDrop}
+								renderButton={this.renderButton}
 							/>
 						</MastheadToolbarButtons>
 
 						<MastheadToolbarButtons>
-							<Button icon="bold" onClick={() => toggleInlineStyle("BOLD")} />
-							<Button icon="italic" onClick={() => toggleInlineStyle("ITALIC")} />
-							<Button icon="underline" onClick={() => toggleInlineStyle("UNDERLINE")} />
+							<Button icon="bold" isSelected={this.props.currentInlineStyle.has("BOLD")} onClick={() => toggleInlineStyle("BOLD")} />
+							<Button icon="italic" isSelected={this.props.currentInlineStyle.has("ITALIC")} onClick={() => toggleInlineStyle("ITALIC")} />
+							<Button icon="underline" isSelected={this.props.currentInlineStyle.has("UNDERLINE")} onClick={() => toggleInlineStyle("UNDERLINE")} />
 						</MastheadToolbarButtons>
 					</MastheadToolbar>
 					<MastheadAlignRight>

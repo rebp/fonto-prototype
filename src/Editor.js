@@ -120,6 +120,8 @@ class EditorPrototype extends Component {
 		return (
 			<App>
 				<Header status={status}
+					currentInlineStyle={this.state.editorState.getCurrentInlineStyle()}
+					currentBlockType={RichUtils.getCurrentBlockType(this.state.editorState)}
 					toggleInlineStyle={this.toggleInlineStyle}
 					spellCheck={spellCheck}
 					toggleSpellCheck={this.toggleSpellCheck}
