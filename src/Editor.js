@@ -61,8 +61,7 @@ class EditorPrototype extends Component {
 			bodyClassName: css({
 				color: "#1976d2",
 				margin: "5px 0px"
-			  }),			
-			autoClose: false,
+			}),
 			hideProgressBar: true,
 			closeOnClick: true,
 			toastId: 1
@@ -90,8 +89,7 @@ class EditorPrototype extends Component {
 			bodyClassName: css({
 				color: "#d32f2f",
 				margin: "5px 0px"
-			  }),
-			autoClose: false,
+			}),
 			hideProgressBar: true,
 			toastId: 1
 		});
@@ -135,14 +133,14 @@ class EditorPrototype extends Component {
 
 	saveToServerHandler = () => {
 		let data = convertToRaw(this.state.editorState.getCurrentContent())
-		axios.post(SERVER , data)
+		axios.post(SERVER, data)
 	}
 
 	getFromServerHandler = async () => {
 
 		const document = await axios.get(SERVER)
 
-		if(Object.keys(document.data).length === 0) {
+		if (Object.keys(document.data).length === 0) {
 			this.onChange(EditorState.createEmpty())
 		} else {
 			this.onChange(EditorState.createWithContent(convertFromRaw(document.data)))
@@ -151,9 +149,9 @@ class EditorPrototype extends Component {
 	}
 
 	componentWillMount = () => {
-	  this.getFromServerHandler()
+		this.getFromServerHandler()
 	}
-	
+
 
 	render() {
 
@@ -170,7 +168,12 @@ class EditorPrototype extends Component {
 					headerBlockType={this.headerBlockType}
 					save={this.saveToServerHandler}
 				/>
-				<Flex flex="1" flexDirection="column" paddingSize="l">
+				<Flex
+					flex="1"
+					flexDirection="column"
+					paddingSize="l"
+					isScrollContainer={true}
+				>
 					<div {...styles.editor}>
 						<Editor
 							ref={this.setEditor}
@@ -191,6 +194,7 @@ class EditorPrototype extends Component {
 						minHeight: "0px"
 					})}
 					closeButton={false}
+					autoClose={5000}
 					transition={Slide}
 				/>
 				{this.state.isModalOpen && <Modal toggleModal={this.toggleModal} />}
