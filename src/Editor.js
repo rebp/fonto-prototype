@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast, Slide, } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import Header from './Header';
 import BottomStatusbar from './BottomStatusbar';
 import Modal from './Modal';
 
-import { Editor, EditorState, RichUtils } from 'draft-js';
+import { css } from 'glamor';
+
+import { Editor, EditorState, RichUtils, convertToRaw, convertFromRaw } from 'draft-js';
 
 import {
 	App,
@@ -17,6 +19,8 @@ import {
 } from 'fds/components';
 
 import { applyCss } from 'fds/system';
+import axios from 'axios';
+
 
 const styles = {
 	editor: applyCss({
@@ -29,6 +33,8 @@ const styles = {
 		}
 	})
 };
+
+const SERVER = 'http://localhost:3005/document';
 
 class EditorPrototype extends Component {
 
@@ -48,7 +54,15 @@ class EditorPrototype extends Component {
 		this.setState({ status: "online" })
 		toast.info("Online", {
 			position: "bottom-right",
-			autoClose: 5000,
+			className: css({
+				background: '#e8f1fb',
+				border: "1px solid #1976d2"
+			}),
+			bodyClassName: css({
+				color: "#1976d2",
+				margin: "5px 0px"
+			  }),			
+			autoClose: false,
 			hideProgressBar: true,
 			closeOnClick: true,
 			toastId: 1
@@ -57,9 +71,8 @@ class EditorPrototype extends Component {
 
 	offlineToastRenderer = ({ closeToast }) => (
 		<Block spaceHorizontalSize="m">
-			<Text colorName="app-background" >Offline</Text>
+			<Text colorName="icon-s-error-color">Offline</Text>
 			<TextLink
-				colorName="app-background"
 				label="Click here for more info"
 				onClick={() => { this.toggleModal(); closeToast(); }} />
 		</Block>
@@ -70,9 +83,16 @@ class EditorPrototype extends Component {
 		this.setState({ status: "offline" })
 		toast.error(this.offlineToastRenderer, {
 			position: "bottom-right",
-			autoClose: 5000,
+			className: css({
+				background: '#fbeaea',
+				border: "1px solid #d32f2f"
+			}),
+			bodyClassName: css({
+				color: "#d32f2f",
+				margin: "5px 0px"
+			  }),
+			autoClose: false,
 			hideProgressBar: true,
-			closeOnClick: true,
 			toastId: 1
 		});
 	}
@@ -113,6 +133,28 @@ class EditorPrototype extends Component {
 		this.onChange(RichUtils.toggleBlockType(this.state.editorState, blockType))
 	}
 
+	saveToServerHandler = () => {
+		let data = convertToRaw(this.state.editorState.getCurrentContent())
+		axios.post(SERVER , data)
+	}
+
+	getFromServerHandler = async () => {
+
+		const document = await axios.get(SERVER)
+
+		if(Object.keys(document.data).length === 0) {
+			this.onChange(EditorState.createEmpty())
+		} else {
+			this.onChange(EditorState.createWithContent(convertFromRaw(document.data)))
+		}
+
+	}
+
+	componentWillMount = () => {
+	  this.getFromServerHandler()
+	}
+	
+
 	render() {
 
 		const { status, editorState, spellCheck } = this.state;
@@ -120,12 +162,13 @@ class EditorPrototype extends Component {
 		return (
 			<App>
 				<Header status={status}
-					currentInlineStyle={this.state.editorState.getCurrentInlineStyle()}
+					currentInlineStyle={editorState.getCurrentInlineStyle()}
 					currentBlockType={RichUtils.getCurrentBlockType(this.state.editorState)}
 					toggleInlineStyle={this.toggleInlineStyle}
 					spellCheck={spellCheck}
 					toggleSpellCheck={this.toggleSpellCheck}
 					headerBlockType={this.headerBlockType}
+					save={this.saveToServerHandler}
 				/>
 				<Flex flex="1" flexDirection="column" paddingSize="l">
 					<div {...styles.editor}>
@@ -138,7 +181,18 @@ class EditorPrototype extends Component {
 					</div>
 				</Flex>
 				<BottomStatusbar status={status} toggleModal={this.toggleModal} />
-				<ToastContainer />
+				<ToastContainer
+					className={css({
+						position: "fixed",
+						width: "200px",
+						padding: "4px",
+						bottom: "40px",
+						right: "10px",
+						minHeight: "0px"
+					})}
+					closeButton={false}
+					transition={Slide}
+				/>
 				{this.state.isModalOpen && <Modal toggleModal={this.toggleModal} />}
 			</App>
 		);

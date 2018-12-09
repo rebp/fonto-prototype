@@ -45,7 +45,7 @@ class Header extends Component {
 	);
 
 	render() {
-		const { status, spellCheck, toggleSpellCheck, toggleInlineStyle } = this.props;
+		const { status, spellCheck, toggleSpellCheck, toggleInlineStyle, save } = this.props;
 
 		return (
 			<Masthead>
@@ -55,6 +55,10 @@ class Header extends Component {
 					<Button icon="undo" onClick={this.handleClick} />
 
 					<Button icon="repeat" onClick={this.handleClick} />
+
+					<Button icon="save" onClick={() => {
+						save();
+					}} />
 
 					<MastheadTabButtons>
 						<Button

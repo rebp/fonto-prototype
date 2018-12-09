@@ -15,8 +15,7 @@ import {
 } from 'fds/components';
 
 import {
-	applyCss,
-	marginBottom
+	applyCss
 } from 'fds/system';
 
 const styles = applyCss({
