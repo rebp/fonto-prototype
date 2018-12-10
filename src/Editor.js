@@ -8,7 +8,13 @@ import Modal from './Modal';
 
 import { css } from 'glamor';
 
-import { Editor, EditorState, RichUtils, convertToRaw, convertFromRaw } from 'draft-js';
+import {
+	Editor,
+	EditorState,
+	RichUtils,
+	convertToRaw,
+	convertFromRaw
+} from 'draft-js';
 
 import {
 	App,
@@ -95,7 +101,6 @@ class EditorPrototype extends Component {
 		});
 	}
 
-
 	checkNetworkStatus = () => {
 
 		if (!navigator.onLine) {
@@ -127,16 +132,27 @@ class EditorPrototype extends Component {
 		this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, inlineStyle))
 	}
 
-	headerBlockType = (blockType) => {
+	toggleHeaderBlockType = (blockType) => {
 		this.onChange(RichUtils.toggleBlockType(this.state.editorState, blockType))
 	}
 
-	saveToServerHandler = () => {
+	saveDocumentToServerHandler = async () => {
+
+		const document = await axios.get(SERVER)
+
 		let data = convertToRaw(this.state.editorState.getCurrentContent())
-		axios.post(SERVER, data)
+
+		if (JSON.stringify(document.data) !== JSON.stringify(data) ) {
+			axios.post(SERVER, data)
+			console.log("Document Saved");
+		} else {
+			console.log("Document Not Saved");
+		}
+
+		
 	}
 
-	getFromServerHandler = async () => {
+	getDocumentFromServerHandler = async () => {
 
 		const document = await axios.get(SERVER)
 
@@ -149,9 +165,8 @@ class EditorPrototype extends Component {
 	}
 
 	componentWillMount = () => {
-		this.getFromServerHandler()
+		this.getDocumentFromServerHandler()
 	}
-
 
 	render() {
 
@@ -161,12 +176,14 @@ class EditorPrototype extends Component {
 			<App>
 				<Header status={status}
 					currentInlineStyle={editorState.getCurrentInlineStyle()}
-					currentBlockType={RichUtils.getCurrentBlockType(this.state.editorState)}
+					currentBlockType={RichUtils.getCurrentBlockType(editorState)}
 					toggleInlineStyle={this.toggleInlineStyle}
 					spellCheck={spellCheck}
 					toggleSpellCheck={this.toggleSpellCheck}
-					headerBlockType={this.headerBlockType}
-					save={this.saveToServerHandler}
+					toggleHeaderBlockType={this.toggleHeaderBlockType}
+					save={this.saveDocumentToServerHandler}
+					undo={() => this.onChange(EditorState.undo(editorState))}
+					redo={() => this.onChange(EditorState.redo(editorState))}
 				/>
 				<Flex
 					flex="1"
@@ -204,6 +221,9 @@ class EditorPrototype extends Component {
 
 	componentDidMount = () => {
 		this.checkNetworkStatus()
+		setInterval(() => {
+			this.saveDocumentToServerHandler()
+		}, 4000);
 	}
 
 }

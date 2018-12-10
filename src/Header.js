@@ -35,30 +35,28 @@ class Header extends Component {
 	renderDrop = () => (
 		<Drop>
 			<Menu>
-				<MenuItem label="Heading 1" isSelected={this.props.currentBlockType === "header-one"} onClick={() => this.props.headerBlockType("header-one")} />
-				<MenuItem label="Heading 2" isSelected={this.props.currentBlockType === "header-two"} onClick={() => this.props.headerBlockType("header-two")} />
-				<MenuItem label="Heading 3" isSelected={this.props.currentBlockType === "header-three"} onClick={() => this.props.headerBlockType("header-three")} />
-				<MenuItem label="Heading 4" isSelected={this.props.currentBlockType === "header-four"} onClick={() => this.props.headerBlockType("header-four")} />
-				<MenuItem label="Heading 5" isSelected={this.props.currentBlockType === "header-five"} onClick={() => this.props.headerBlockType("header-five")} />
+				<MenuItem label="Heading 1" isSelected={this.props.currentBlockType === "header-one"} onClick={() => this.props.toggleHeaderBlockType("header-one")} />
+				<MenuItem label="Heading 2" isSelected={this.props.currentBlockType === "header-two"} onClick={() => this.props.toggleHeaderBlockType("header-two")} />
+				<MenuItem label="Heading 3" isSelected={this.props.currentBlockType === "header-three"} onClick={() => this.props.toggleHeaderBlockType("header-three")} />
+				<MenuItem label="Heading 4" isSelected={this.props.currentBlockType === "header-four"} onClick={() => this.props.toggleHeaderBlockType("header-four")} />
+				<MenuItem label="Heading 5" isSelected={this.props.currentBlockType === "header-five"} onClick={() => this.props.toggleHeaderBlockType("header-five")} />
 			</Menu>
 		</Drop>
 	);
 
 	render() {
-		const { status, spellCheck, toggleSpellCheck, toggleInlineStyle, save } = this.props;
+		const { status, spellCheck, toggleSpellCheck, toggleInlineStyle, save, undo, redo } = this.props;
 
 		return (
 			<Masthead>
 				<MastheadContent>
 					<FontoLogo />
 
-					<Button icon="undo" onClick={this.handleClick} />
+					<Button icon="undo" onClick={() => undo()} />
 
-					<Button icon="repeat" onClick={this.handleClick} />
+					<Button icon="repeat" onClick={() => redo()} />
 
-					<Button icon="save" onClick={() => {
-						save();
-					}} />
+					<Button icon="save" onClick={() => save() } />
 
 					<MastheadTabButtons>
 						<Button
@@ -85,6 +83,7 @@ class Header extends Component {
 							<Button icon="italic" isSelected={this.props.currentInlineStyle.has("ITALIC")} onClick={() => toggleInlineStyle("ITALIC")} />
 							<Button icon="underline" isSelected={this.props.currentInlineStyle.has("UNDERLINE")} onClick={() => toggleInlineStyle("UNDERLINE")} />
 						</MastheadToolbarButtons>
+
 					</MastheadToolbar>
 					<MastheadAlignRight>
 						<Button
