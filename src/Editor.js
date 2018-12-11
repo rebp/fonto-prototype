@@ -51,12 +51,14 @@ class EditorPrototype extends Component {
 			isModalOpen: false,
 			status: "online",
 			editorState: EditorState.createEmpty(),
-			spellCheck: false
+			spellCheck: false,
+			isDocumentSave: false,
+			isOfflineSaved: false
 		};
 	}
 
 	sendOnlineToast = () => {
-		navigator.serviceWorker.controller.postMessage("online");
+		// navigator.serviceWorker.controller.postMessage("online");
 		this.setState({ status: "online" })
 		toast.info("Online", {
 			position: "bottom-right",
@@ -84,7 +86,7 @@ class EditorPrototype extends Component {
 	)
 
 	sendOfflineToast = () => {
-		navigator.serviceWorker.controller.postMessage("offline");
+		// navigator.serviceWorker.controller.postMessage("offline");
 		this.setState({ status: "offline" })
 		toast.error(this.offlineToastRenderer, {
 			position: "bottom-right",
@@ -114,7 +116,7 @@ class EditorPrototype extends Component {
 
 		window.addEventListener('offline', e => {
 			this.sendOfflineToast()
-			this.setState({ spellCheck: false })
+			this.setState({ spellCheck: false, isOfflineSaved: true })
 		});
 	}
 
@@ -136,20 +138,90 @@ class EditorPrototype extends Component {
 		this.onChange(RichUtils.toggleBlockType(this.state.editorState, blockType))
 	}
 
+	saveAnimationHandler = () => {
+		this.setState({ isDocumentSave: true })
+
+		setTimeout(() => {
+			this.setState({ isDocumentSave: false })
+		}, 2500);
+	}
+
 	saveDocumentToServerHandler = async () => {
 
-		const document = await axios.get(SERVER)
+		console.log("isOfflineSaved: ", this.state.isOfflineSaved)
 
-		let data = convertToRaw(this.state.editorState.getCurrentContent())
+		const data = convertToRaw(this.state.editorState.getCurrentContent())
 
-		if (JSON.stringify(document.data) !== JSON.stringify(data) ) {
-			axios.post(SERVER, data)
-			console.log("Document Saved");
+		if (this.state.status === "online" && this.state.isOfflineSaved) {
+			this.setState({ isOfflineSaved: false })
+
+			const document = await axios.get(SERVER)
+
+			setTimeout(() => {
+
+				if (JSON.stringify(document.data) !== localStorage.getItem("offlineSavedDocument")) {
+
+					axios.post(SERVER, data)
+					this.saveAnimationHandler()
+
+					toast.warning("Saving from offline", {
+						position: "bottom-right",
+						className: css({
+							background: '#fef2e6',
+							border: "1px solid #f57c00"
+						}),
+						bodyClassName: css({
+							color: "#f57c00",
+							margin: "5px 0px"
+						}),
+						hideProgressBar: true,
+						closeOnClick: true,
+						toastId: 1
+					});
+
+					console.log("Saving Online")
+
+				}
+
+			}, 5000);
+
+		} else if (this.state.status === "online") {
+
+			const document = await axios.get(SERVER)
+
+			if (JSON.stringify(document.data) !== JSON.stringify(data)) {
+
+				axios.post(SERVER, data)
+				this.saveAnimationHandler()
+				console.log("Saving Online");
+
+			} else {
+				console.log("Not Saving Online");
+			}
+
 		} else {
-			console.log("Document Not Saved");
+
+			if (!localStorage.getItem("offlineSavedDocument")) {
+
+				localStorage.setItem("offlineSavedDocument", JSON.stringify(data))
+				this.saveAnimationHandler()
+				console.log("First Time Saving Offline");
+
+			} else {
+				if (localStorage.getItem("offlineSavedDocument") !== JSON.stringify(data)) {
+
+					localStorage.setItem("offlineSavedDocument", JSON.stringify(data))
+					this.saveAnimationHandler()
+					console.log("Saving Offline");
+
+				} else {
+					console.log("Not Saving Offline");
+				}
+
+			}
 		}
 
-		
+
 	}
 
 	getDocumentFromServerHandler = async () => {
@@ -170,11 +242,12 @@ class EditorPrototype extends Component {
 
 	render() {
 
-		const { status, editorState, spellCheck } = this.state;
+		const { status, editorState, spellCheck, isDocumentSave } = this.state;
 
 		return (
 			<App>
-				<Header status={status}
+				<Header
+					status={status}
 					currentInlineStyle={editorState.getCurrentInlineStyle()}
 					currentBlockType={RichUtils.getCurrentBlockType(editorState)}
 					toggleInlineStyle={this.toggleInlineStyle}
@@ -184,6 +257,7 @@ class EditorPrototype extends Component {
 					save={this.saveDocumentToServerHandler}
 					undo={() => this.onChange(EditorState.undo(editorState))}
 					redo={() => this.onChange(EditorState.redo(editorState))}
+					isDocumentSave={isDocumentSave}
 				/>
 				<Flex
 					flex="1"
