@@ -42,8 +42,8 @@ const styles = {
 	})
 };
 
-const SERVER = window.location.protocol +"//"+ window.location.hostname + ":3005/document";
-const STATUS = window.location.protocol +"//"+ window.location.hostname + ":3005/editor";
+const SERVER = "/api/document";
+const STATUS = "/api/editor";
 
 class EditorPrototype extends Component {
 
@@ -361,7 +361,7 @@ class EditorPrototype extends Component {
 
 		setInterval(() => {
 			this.checkFakeNetworkStatus()
-		}, 2000);		
+		}, 2000);
 	}
 }
 
