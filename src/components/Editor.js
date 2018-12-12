@@ -42,7 +42,8 @@ const styles = {
 	})
 };
 
-const SERVER = 'http://localhost:3005/document';
+const SERVER = window.location.protocol +"//"+ window.location.hostname + ":3005/document";
+const STATUS = window.location.protocol +"//"+ window.location.hostname + ":3005/editor";
 
 class EditorPrototype extends Component {
 
@@ -58,7 +59,9 @@ class EditorPrototype extends Component {
 			spellCheck: false,
 			isDocumentSave: false,
 			isOfflineSaved: false,
-			hasChange: false
+			hasChange: false,
+			isOnlineToastVisible: true,
+			isOfflineToastVisible: false
 		};
 	}
 
@@ -104,6 +107,24 @@ class EditorPrototype extends Component {
 			hideProgressBar: true,
 			toastId: 1
 		});
+	}
+
+	checkFakeNetworkStatus = async () => {
+		const editor = await axios.get(STATUS)
+
+		this.setState({status: editor.data.status})
+
+		if(this.state.status === "online" && !this.state.isOnlineToastVisible) {
+			this.setState({isOnlineToastVisible: true, isOfflineToastVisible: false})
+			this.sendOnlineToast()
+			this.saveDocumentToServerHandler();
+		}
+
+		if(this.state.status === "offline" && !this.state.isOfflineToastVisible) {
+			this.setState({ spellCheck: false, isOfflineSaved: true, status: "offline", isOnlineToastVisible: false, isOfflineToastVisible: true })
+			this.sendOfflineToast()
+		}
+		console.log("Status: ", editor.data.status);
 	}
 
 	checkNetworkStatus = () => {
@@ -336,9 +357,12 @@ class EditorPrototype extends Component {
 	}
 
 	componentDidMount = () => {
-		this.checkNetworkStatus()
-	}
+		// this.checkNetworkStatus()
 
+		setInterval(() => {
+			this.checkFakeNetworkStatus()
+		}, 2000);		
+	}
 }
 
 export default EditorPrototype;
