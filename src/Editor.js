@@ -12,9 +12,11 @@ import {
 	Editor,
 	EditorState,
 	RichUtils,
-	convertToRaw,
-	convertFromRaw
+	convertFromRaw,
+	convertToRaw
 } from 'draft-js';
+
+import immutable from 'immutable';
 
 import {
 	App,
@@ -44,6 +46,8 @@ const SERVER = 'http://localhost:3005/document';
 
 class EditorPrototype extends Component {
 
+	changeSaveTimeout = null;
+
 	constructor(props) {
 		super(props);
 
@@ -53,13 +57,13 @@ class EditorPrototype extends Component {
 			editorState: EditorState.createEmpty(),
 			spellCheck: false,
 			isDocumentSave: false,
-			isOfflineSaved: false
+			isOfflineSaved: false,
+			hasChange: false
 		};
 	}
 
 	sendOnlineToast = () => {
 		// navigator.serviceWorker.controller.postMessage("online");
-		this.setState({ status: "online" })
 		toast.info("Online", {
 			position: "bottom-right",
 			className: css({
@@ -87,7 +91,6 @@ class EditorPrototype extends Component {
 
 	sendOfflineToast = () => {
 		// navigator.serviceWorker.controller.postMessage("offline");
-		this.setState({ status: "offline" })
 		toast.error(this.offlineToastRenderer, {
 			position: "bottom-right",
 			className: css({
@@ -105,18 +108,26 @@ class EditorPrototype extends Component {
 
 	checkNetworkStatus = () => {
 
+		// TODO: If online when !hasDocument, then getDocumentFromServerHandler
+
 		if (!navigator.onLine) {
+			this.setState({ spellCheck: false, isOfflineSaved: true, status: "offline" })
 			this.sendOfflineToast()
-			this.setState({ spellCheck: false })
+		}
+		else {
+			// TODO: Only if there are offline changes
+			this.saveDocumentToServerHandler();
 		}
 
 		window.addEventListener('online', e => {
+			this.setState({ status: "online" })
 			this.sendOnlineToast()
+			this.saveDocumentToServerHandler();
 		});
 
 		window.addEventListener('offline', e => {
+			this.setState({ spellCheck: false, isOfflineSaved: true, status: "offline" })
 			this.sendOfflineToast()
-			this.setState({ spellCheck: false, isOfflineSaved: true })
 		});
 	}
 
@@ -128,7 +139,22 @@ class EditorPrototype extends Component {
 		this.setState({ isModalOpen: !this.state.isModalOpen })
 	}
 
-	onChange = (editorState) => this.setState({ editorState });
+	onChange = (editorState) => {
+		const contentHasChanged = this.state.hasChange || !immutable.is(this.state.editorState.getCurrentContent(), editorState.getCurrentContent());
+
+		this.setState({ editorState, hasChange: contentHasChanged });
+
+		if (contentHasChanged) {
+			if (this.changeSaveTimeout) {
+				clearTimeout(this.changeSaveTimeout);
+			}
+
+			this.changeSaveTimeout = setTimeout(() => {
+				this.changeSaveTimeout = null;
+				this.saveDocumentToServerHandler();
+			}, 2000);
+		}
+	}
 
 	toggleInlineStyle = (inlineStyle) => {
 		this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, inlineStyle))
@@ -139,7 +165,7 @@ class EditorPrototype extends Component {
 	}
 
 	saveAnimationHandler = () => {
-		this.setState({ isDocumentSave: true })
+		this.setState({ isDocumentSave: true, hasChange: false })
 
 		setTimeout(() => {
 			this.setState({ isDocumentSave: false })
@@ -155,16 +181,18 @@ class EditorPrototype extends Component {
 		if (this.state.status === "online" && this.state.isOfflineSaved) {
 			this.setState({ isOfflineSaved: false })
 
-			const document = await axios.get(SERVER)
+			setTimeout(async () => {
 
-			setTimeout(() => {
+				const document = await axios.get(SERVER)
 
+				// TODO: Compare with data
 				if (JSON.stringify(document.data) !== localStorage.getItem("offlineSavedDocument")) {
 
-					axios.post(SERVER, data)
+					localStorage.setItem("offlineSavedDocument", JSON.stringify(data))
+					await axios.post(SERVER, data)
 					this.saveAnimationHandler()
 
-					toast.warning("Saving from offline", {
+					toast.warning("Saved offline changes", {
 						position: "bottom-right",
 						className: css({
 							background: '#fef2e6',
@@ -179,7 +207,7 @@ class EditorPrototype extends Component {
 						toastId: 1
 					});
 
-					console.log("Saving Online")
+					console.log("Saved Online")
 
 				}
 
@@ -191,7 +219,8 @@ class EditorPrototype extends Component {
 
 			if (JSON.stringify(document.data) !== JSON.stringify(data)) {
 
-				axios.post(SERVER, data)
+				localStorage.setItem("offlineSavedDocument", JSON.stringify(data))
+				await axios.post(SERVER, data)
 				this.saveAnimationHandler()
 				console.log("Saving Online");
 
@@ -226,14 +255,27 @@ class EditorPrototype extends Component {
 
 	getDocumentFromServerHandler = async () => {
 
+		// TODO: If offline, load from localStorage, or from service worker cache, or else load an empty document or do not show any document?
+		// If offline, and there is no localStorage or service worker cache, then do not show document but a warning:
+		// <StateMessage
+		// 	title="Warning state message"
+		// 	message="Something is not going entirely as planned. You should go check it out!"
+		// 	connotation="warning"
+		// 	visual="warning"
+		// />
+
 		const document = await axios.get(SERVER)
 
+		let editorState;
+
 		if (Object.keys(document.data).length === 0) {
-			this.onChange(EditorState.createEmpty())
+			editorState = EditorState.createEmpty();
 		} else {
-			this.onChange(EditorState.createWithContent(convertFromRaw(document.data)))
+			editorState = EditorState.createWithContent(convertFromRaw(document.data));
 		}
 
+		localStorage.setItem("offlineSavedDocument", JSON.stringify(document.data));
+		this.setState({ editorState });
 	}
 
 	componentWillMount = () => {
@@ -295,9 +337,6 @@ class EditorPrototype extends Component {
 
 	componentDidMount = () => {
 		this.checkNetworkStatus()
-		setInterval(() => {
-			this.saveDocumentToServerHandler()
-		}, 4000);
 	}
 
 }
