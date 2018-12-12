@@ -1,9 +1,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import Editor from './Editor';
 
-ReactDOM.render(<Editor />, document.getElementById('root'));
+import { BrowserRouter } from 'react-router-dom';
+import Routes from './routes'
+
+const App = () => {
+    return(
+        <BrowserRouter>
+            <Routes/>
+        </BrowserRouter>
+    )
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));
 
 if ('serviceWorker' in navigator) {
 	const swUrl = `${process.env.PUBLIC_URL}/sw.js`;

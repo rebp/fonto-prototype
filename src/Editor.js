@@ -116,7 +116,7 @@ class EditorPrototype extends Component {
 		}
 		else {
 			// TODO: Only if there are offline changes
-			this.saveDocumentToServerHandler();
+			// this.saveDocumentToServerHandler();
 		}
 
 		window.addEventListener('online', e => {
