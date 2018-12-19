@@ -58,7 +58,7 @@ class Header extends Component {
 
 					<Button
 						icon={!isDocumentSave ? "save" : "check"}
-						isDisabled={status === "offline" ? true : false}
+						// isDisabled={status === "offline" ? true : false}
 						onClick={() => save()}
 					/>
 
@@ -93,6 +93,7 @@ class Header extends Component {
 						<Button
 							label="Spell Check"
 							icon="magic"
+							tooltipContent={status === "offline" ? "This function won't work while being offline" : null}
 							isSelected={spellCheck}
 							onClick={() => toggleSpellCheck(spellCheck)}
 							isDisabled={status === "online" ? false : true}

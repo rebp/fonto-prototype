@@ -9,7 +9,10 @@ import {
 	PopoverHeader,
 	Text,
 	Statusbar,
-	StatusbarAlignRight
+	StatusbarAlignRight,
+	UnorderedList,
+	UnorderedListItem,
+	Label
 } from 'fds/components';
 
 class BottomStatusbar extends Component {
@@ -27,16 +30,19 @@ class BottomStatusbar extends Component {
 
 	renderPopover = ({ togglePopover }) => (
 		<Popover>
-			<PopoverHeader title="WARNING" />
+			{/* <PopoverHeader title="WARNING" /> */}
 
 			<PopoverBody>
-				<Text>
-					You are currenty working offline!
-				</Text>
+				<Text marginBottom="m" >The following features won't work while being offline</Text>
+				<UnorderedList>
+					<UnorderedListItem>
+						<Label isBold={true}>Spell Checker</Label>
+					</UnorderedListItem>
+				</UnorderedList>
 			</PopoverBody>
 
 			<PopoverFooter>
-				<Button type="primary" label="More info" onClick={this.props.toggleModal} />
+				{/* <Button type="primary" label="More info" onClick={this.props.toggleModal} /> */}
 				<Button type="primary" label="Close" onClick={togglePopover} />
 			</PopoverFooter>
 		</Popover>

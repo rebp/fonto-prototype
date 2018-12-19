@@ -86,9 +86,10 @@ class EditorPrototype extends Component {
 	offlineToastRenderer = ({ closeToast }) => (
 		<Block spaceHorizontalSize="m">
 			<Text colorName="icon-s-error-color">Offline</Text>
-			<TextLink
+			{/* <TextLink
 				label="Click here for more info"
-				onClick={() => { this.toggleModal(); closeToast(); }} />
+				onClick={() => { this.toggleModal(); closeToast(); }} 
+				/> */}
 		</Block>
 	)
 
@@ -216,11 +217,11 @@ class EditorPrototype extends Component {
 					toast.warning("Saved offline changes", {
 						position: "bottom-right",
 						className: css({
-							background: '#fef2e6',
-							border: "1px solid #f57c00"
+							background: '#ebf4ec',
+							border: "1px solid #388e3c"
 						}),
 						bodyClassName: css({
-							color: "#f57c00",
+							color: "#388e3c",
 							margin: "5px 0px"
 						}),
 						hideProgressBar: true,
