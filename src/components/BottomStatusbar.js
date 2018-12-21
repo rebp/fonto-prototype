@@ -33,10 +33,13 @@ class BottomStatusbar extends Component {
 			{/* <PopoverHeader title="WARNING" /> */}
 
 			<PopoverBody>
-				<Text marginBottom="m" >The following features won't work while being offline</Text>
+				<Text>Some functions might not work offline</Text>
 				<UnorderedList>
 					<UnorderedListItem>
-						<Label isBold={true}>Spell Checker</Label>
+						<Label isBold={true}>Spell Check</Label><Text>works only offline</Text>
+					</UnorderedListItem>
+					<UnorderedListItem>
+						<Label isBold={true}>Save button</Label><Text>works only online. However, the edito saves your changes while working offline</Text>
 					</UnorderedListItem>
 				</UnorderedList>
 			</PopoverBody>

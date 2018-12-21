@@ -13,16 +13,16 @@ import {
 	EditorState,
 	RichUtils,
 	convertFromRaw,
-	convertToRaw
+	convertToRaw,
+	DefaultDraftBlockRenderMap
 } from 'draft-js';
 
-import immutable from 'immutable';
+import Immutable from 'immutable';
 
 import {
 	App,
 	Flex,
 	Block,
-	TextLink,
 	Text
 } from 'fds/components';
 
@@ -45,6 +45,7 @@ const styles = {
 const SERVER = "/api/document";
 const STATUS = "/api/editor";
 
+
 class EditorPrototype extends Component {
 
 	changeSaveTimeout = null;
@@ -63,6 +64,20 @@ class EditorPrototype extends Component {
 			isOnlineToastVisible: true,
 			isOfflineToastVisible: false
 		};
+	}
+
+	extendedBlockRenderMap = () => {
+
+		const blockRenderMap = Immutable.Map({
+			'paragraph': {
+				element: 'p'
+			},
+			'unstyled': {
+				element: 'p'
+			}
+		 });
+
+		 return DefaultDraftBlockRenderMap.merge(blockRenderMap);
 	}
 
 	sendOnlineToast = () => {
@@ -162,7 +177,7 @@ class EditorPrototype extends Component {
 	}
 
 	onChange = (editorState) => {
-		const contentHasChanged = this.state.hasChange || !immutable.is(this.state.editorState.getCurrentContent(), editorState.getCurrentContent());
+		const contentHasChanged = this.state.hasChange || !Immutable.is(this.state.editorState.getCurrentContent(), editorState.getCurrentContent());
 
 		this.setState({ editorState, hasChange: contentHasChanged });
 
@@ -335,6 +350,7 @@ class EditorPrototype extends Component {
 							editorState={editorState}
 							onChange={this.onChange}
 							spellCheck={spellCheck}
+							blockRenderMap={this.extendedBlockRenderMap()}
 						/>
 					</div>
 				</Flex>

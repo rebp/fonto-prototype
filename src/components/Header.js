@@ -18,10 +18,6 @@ import {
 
 class Header extends Component {
 
-	handleClick = () => {
-		//
-	}
-
 	renderButton = ({ isDropOpened, toggleDrop }) => (
 		<Button
 			onClick={toggleDrop}
@@ -35,11 +31,12 @@ class Header extends Component {
 	renderDrop = () => (
 		<Drop>
 			<Menu>
-				<MenuItem label="Heading 1" isSelected={this.props.currentBlockType === "header-one"} onClick={() => this.props.toggleHeaderBlockType("header-one")} />
-				<MenuItem label="Heading 2" isSelected={this.props.currentBlockType === "header-two"} onClick={() => this.props.toggleHeaderBlockType("header-two")} />
-				<MenuItem label="Heading 3" isSelected={this.props.currentBlockType === "header-three"} onClick={() => this.props.toggleHeaderBlockType("header-three")} />
-				<MenuItem label="Heading 4" isSelected={this.props.currentBlockType === "header-four"} onClick={() => this.props.toggleHeaderBlockType("header-four")} />
-				<MenuItem label="Heading 5" isSelected={this.props.currentBlockType === "header-five"} onClick={() => this.props.toggleHeaderBlockType("header-five")} />
+				<MenuItem label="Paragraph" icon="paragraph" isSelected={this.props.currentBlockType === "paragraph"} onClick={() => this.props.toggleHeaderBlockType("paragraph")} />
+				<MenuItem label="Heading 1" icon="header" isSelected={this.props.currentBlockType === "header-one"} onClick={() => this.props.toggleHeaderBlockType("header-one")} />
+				<MenuItem label="Heading 2" icon="header" isSelected={this.props.currentBlockType === "header-two"} onClick={() => this.props.toggleHeaderBlockType("header-two")} />
+				<MenuItem label="Heading 3" icon="header" isSelected={this.props.currentBlockType === "header-three"} onClick={() => this.props.toggleHeaderBlockType("header-three")} />
+				<MenuItem label="Heading 4" icon="header" isSelected={this.props.currentBlockType === "header-four"} onClick={() => this.props.toggleHeaderBlockType("header-four")} />
+				<MenuItem label="Heading 5" icon="header" isSelected={this.props.currentBlockType === "header-five"} onClick={() => this.props.toggleHeaderBlockType("header-five")} />
 			</Menu>
 		</Drop>
 	);
@@ -58,7 +55,8 @@ class Header extends Component {
 
 					<Button
 						icon={!isDocumentSave ? "save" : "check"}
-						// isDisabled={status === "offline" ? true : false}
+						tooltipContent={status === "offline" ? "The editor saves automatically for you" : null}
+						isDisabled={status === "offline" ? true : false}
 						onClick={() => save()}
 					/>
 
