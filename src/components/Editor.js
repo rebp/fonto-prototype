@@ -75,9 +75,9 @@ class EditorPrototype extends Component {
 			'unstyled': {
 				element: 'p'
 			}
-		 });
+		});
 
-		 return DefaultDraftBlockRenderMap.merge(blockRenderMap);
+		return DefaultDraftBlockRenderMap.merge(blockRenderMap);
 	}
 
 	sendOnlineToast = () => {
@@ -128,15 +128,15 @@ class EditorPrototype extends Component {
 	checkFakeNetworkStatus = async () => {
 		const editor = await axios.get(STATUS)
 
-		this.setState({status: editor.data.status})
+		this.setState({ status: editor.data.status })
 
-		if(this.state.status === "online" && !this.state.isOnlineToastVisible) {
-			this.setState({isOnlineToastVisible: true, isOfflineToastVisible: false})
+		if (this.state.status === "online" && !this.state.isOnlineToastVisible) {
+			this.setState({ isOnlineToastVisible: true, isOfflineToastVisible: false })
 			this.sendOnlineToast()
 			this.saveDocumentToServerHandler();
 		}
 
-		if(this.state.status === "offline" && !this.state.isOfflineToastVisible) {
+		if (this.state.status === "offline" && !this.state.isOfflineToastVisible) {
 			this.setState({ spellCheck: false, isOfflineSaved: true, status: "offline", isOnlineToastVisible: false, isOfflineToastVisible: true })
 			this.sendOfflineToast()
 		}
@@ -211,22 +211,47 @@ class EditorPrototype extends Component {
 
 	saveDocumentToServerHandler = async () => {
 
+		// const numbers = [2, 5, 1, 3, 9, 8];
+
+		// const newNumber = numbers.sort()
+
+		// console.log(newNumber.pop())
+
 		console.log("isOfflineSaved: ", this.state.isOfflineSaved)
 
 		const data = convertToRaw(this.state.editorState.getCurrentContent())
+
+		const latestSave = {
+			timestamp: Date.now(),
+			document: { ...data }
+		}
 
 		if (this.state.status === "online" && this.state.isOfflineSaved) {
 			this.setState({ isOfflineSaved: false })
 
 			setTimeout(async () => {
 
-				const document = await axios.get(SERVER)
+				const onlineEditor = await axios.get(SERVER)
+				const offlineEditor = JSON.parse(localStorage.getItem("offlineSavedDocument"))
 
 				// TODO: Compare with data
-				if (JSON.stringify(document.data) !== localStorage.getItem("offlineSavedDocument")) {
 
-					localStorage.setItem("offlineSavedDocument", JSON.stringify(data))
-					await axios.post(SERVER, data)
+				let timestamps = []
+
+				const 	serverTimestamp = onlineEditor.data.timestamp,
+						localTimestamp = offlineEditor.timestamp;
+				
+				timestamps.push(serverTimestamp)
+				timestamps.push(localTimestamp)
+
+				console.log("SERVER: "+serverTimestamp, "LOCAL: "+localTimestamp)
+				console.log("LATEST SAVE: "+timestamps.sort().pop())
+
+
+				if (JSON.stringify(onlineEditor.data.document) !== localStorage.getItem("offlineSavedDocument")) {
+
+					localStorage.setItem("offlineSavedDocument", JSON.stringify(latestSave))
+					await axios.post(SERVER, latestSave)
 					this.saveAnimationHandler()
 
 					toast.warning("Saved offline changes", {
@@ -252,12 +277,12 @@ class EditorPrototype extends Component {
 
 		} else if (this.state.status === "online") {
 
-			const document = await axios.get(SERVER)
+			const editor = await axios.get(SERVER)
 
-			if (JSON.stringify(document.data) !== JSON.stringify(data)) {
+			if (JSON.stringify(editor.data.document) !== JSON.stringify(latestSave.document)) {
 
-				localStorage.setItem("offlineSavedDocument", JSON.stringify(data))
-				await axios.post(SERVER, data)
+				localStorage.setItem("offlineSavedDocument", JSON.stringify(latestSave))
+				await axios.post(SERVER, latestSave)
 				this.saveAnimationHandler()
 				console.log("Saving Online");
 
@@ -269,14 +294,15 @@ class EditorPrototype extends Component {
 
 			if (!localStorage.getItem("offlineSavedDocument")) {
 
-				localStorage.setItem("offlineSavedDocument", JSON.stringify(data))
+				localStorage.setItem("offlineSavedDocument", JSON.stringify(latestSave))
 				this.saveAnimationHandler()
 				console.log("First Time Saving Offline");
 
 			} else {
-				if (localStorage.getItem("offlineSavedDocument") !== JSON.stringify(data)) {
 
-					localStorage.setItem("offlineSavedDocument", JSON.stringify(data))
+				if (localStorage.getItem("offlineSavedDocument") !== JSON.stringify(latestSave)) {
+
+					localStorage.setItem("offlineSavedDocument", JSON.stringify(latestSave))
 					this.saveAnimationHandler()
 					console.log("Saving Offline");
 
@@ -301,18 +327,26 @@ class EditorPrototype extends Component {
 		// 	visual="warning"
 		// />
 
-		const document = await axios.get(SERVER)
+		const status = await axios.get(STATUS)
 
-		let editorState;
+		let editorState = this.state.editorState;
 
-		if (Object.keys(document.data).length === 0) {
+		if (status.data.status === "online") {
+			console.log("Loading editor state from server")
+			const editor = await axios.get(SERVER)
+			editorState = EditorState.createWithContent(convertFromRaw(editor.data.document));
+
+		}else if (!localStorage.getItem("offlineSavedDocument")) {
+			console.log("Loading new editor from localstorage")
 			editorState = EditorState.createEmpty();
 		} else {
-			editorState = EditorState.createWithContent(convertFromRaw(document.data));
+			console.log("Loading editor state from localstorage")
+			const editor = JSON.parse(localStorage.getItem("offlineSavedDocument"))
+			editorState = EditorState.createWithContent(convertFromRaw(editor.document));
 		}
 
-		localStorage.setItem("offlineSavedDocument", JSON.stringify(document.data));
 		this.setState({ editorState });
+
 	}
 
 	componentWillMount = () => {

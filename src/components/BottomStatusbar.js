@@ -6,7 +6,6 @@ import {
 	PopoverAnchor,
 	PopoverBody,
 	PopoverFooter,
-	PopoverHeader,
 	Text,
 	Statusbar,
 	StatusbarAlignRight,

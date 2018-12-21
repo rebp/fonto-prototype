@@ -1,37 +1,42 @@
 {
   "document": {
-    "blocks": [
-      {
-        "key": "fmdra",
-        "text": "FontoXML",
-        "type": "header-one",
-        "depth": 0,
-        "inlineStyleRanges": [],
-        "entityRanges": [],
-        "data": {}
-      },
-      {
-        "key": "9jmua",
-        "text": "ffdhdfhdf",
-        "type": "paragraph",
-        "depth": 0,
-        "inlineStyleRanges": [],
-        "entityRanges": [],
-        "data": {}
-      },
-      {
-        "key": "dur7q",
-        "text": "",
-        "type": "paragraph",
-        "depth": 0,
-        "inlineStyleRanges": [],
-        "entityRanges": [],
-        "data": {}
-      }
-    ],
-    "entityMap": {}
+    "timestamp": 1545406879274,
+    "document": {
+      "blocks": [
+        {
+          "key": "fmdra",
+          "text": " FontoXML",
+          "type": "header-one",
+          "depth": 0,
+          "inlineStyleRanges": [],
+          "entityRanges": [],
+          "data": {}
+        },
+        {
+          "key": "ctqke",
+          "text": "Curabitur sit amet nisl tempus convallis quis lectus. Nulla lorem ut libero malesuada. Vivamus magna justo, lacinia eget consectetur sed, at tellus. Curabitur arcu erat, accumsan id imperdiet et, porttitor at sem. Vivamus justo,  eget consectetur sed, convallis at.",
+          "type": "unstyled",
+          "depth": 0,
+          "inlineStyleRanges": [
+            {
+              "offset": 54,
+              "length": 31,
+              "style": "BOLD"
+            },
+            {
+              "offset": 149,
+              "length": 63,
+              "style": "ITALIC"
+            }
+          ],
+          "entityRanges": [],
+          "data": {}
+        }
+      ],
+      "entityMap": {}
+    }
   },
   "editor": {
-    "status": "offline"
+    "status": "online"
   }
 }
