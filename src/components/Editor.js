@@ -101,10 +101,6 @@ class EditorPrototype extends Component {
 	offlineToastRenderer = ({ closeToast }) => (
 		<Block spaceHorizontalSize="m">
 			<Text colorName="icon-s-error-color">Offline</Text>
-			{/* <TextLink
-				label="Click here for more info"
-				onClick={() => { this.toggleModal(); closeToast(); }} 
-				/> */}
 		</Block>
 	)
 
@@ -211,12 +207,6 @@ class EditorPrototype extends Component {
 
 	saveDocumentToServerHandler = async () => {
 
-		// const numbers = [2, 5, 1, 3, 9, 8];
-
-		// const newNumber = numbers.sort()
-
-		// console.log(newNumber.pop())
-
 		console.log("isOfflineSaved: ", this.state.isOfflineSaved)
 
 		const data = convertToRaw(this.state.editorState.getCurrentContent())
@@ -236,24 +226,25 @@ class EditorPrototype extends Component {
 
 				// TODO: Compare with data
 
-				let timestamps = []
-
-				const 	serverTimestamp = onlineEditor.data.timestamp,
-						localTimestamp = offlineEditor.timestamp;
-				
-				timestamps.push(serverTimestamp)
-				timestamps.push(localTimestamp)
-
-				console.log("SERVER: "+serverTimestamp, "LOCAL: "+localTimestamp)
-				console.log("LATEST SAVE: "+timestamps.sort().pop())
+				const serverTimestamp = onlineEditor.data.timestamp,
+					localTimestamp = offlineEditor.timestamp;
 
 
-				if (JSON.stringify(onlineEditor.data.document) !== localStorage.getItem("offlineSavedDocument")) {
+				if (serverTimestamp > localTimestamp) {
+					console.log("Loading latest document from server and updating local", "SERVER: ",serverTimestamp, "Local: ",localTimestamp)
 
-					localStorage.setItem("offlineSavedDocument", JSON.stringify(latestSave))
+					const editor = await axios.get(SERVER)
+
+					let editorState = EditorState.createWithContent(convertFromRaw(editor.data.document));
+					this.setState({ editorState });
+
+					localStorage.setItem("offlineSavedDocument", JSON.stringify(editor.data.document))
+				} else if (serverTimestamp === localTimestamp) {
+					console.log("No changes made", "SERVER: ",serverTimestamp, "Local: ",localTimestamp)
+				} else {
+					console.log("Loading latest document from local and updating server", "SERVER: ",serverTimestamp, "Local: ",localTimestamp)
+
 					await axios.post(SERVER, latestSave)
-					this.saveAnimationHandler()
-
 					toast.warning("Saved offline changes", {
 						position: "bottom-right",
 						className: css({
@@ -268,9 +259,6 @@ class EditorPrototype extends Component {
 						closeOnClick: true,
 						toastId: 1
 					});
-
-					console.log("Saved Online")
-
 				}
 
 			}, 5000);
@@ -336,7 +324,10 @@ class EditorPrototype extends Component {
 			const editor = await axios.get(SERVER)
 			editorState = EditorState.createWithContent(convertFromRaw(editor.data.document));
 
-		}else if (!localStorage.getItem("offlineSavedDocument")) {
+
+			// TODO:: compare local with server and always use latest
+
+		} else if (!localStorage.getItem("offlineSavedDocument")) {
 			console.log("Loading new editor from localstorage")
 			editorState = EditorState.createEmpty();
 		} else {

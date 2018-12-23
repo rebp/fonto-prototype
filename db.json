@@ -1,6 +1,6 @@
 {
   "document": {
-    "timestamp": 1545406879274,
+    "timestamp": 1545604750768,
     "document": {
       "blocks": [
         {
@@ -14,18 +14,18 @@
         },
         {
           "key": "ctqke",
-          "text": "Curabitur sit amet nisl tempus convallis quis lectus. Nulla lorem ut libero malesuada. Vivamus magna justo, lacinia eget consectetur sed, at tellus. Curabitur arcu erat, accumsan id imperdiet et, porttitor at sem. Vivamus justo,  eget consectetur sed, convallis at.",
+          "text": "Curabitur sit amet nisl tempus convallis quis. Nulla lorem ut libero malesuada. Vivamus, sed, at tellus. Curabitur arc, accumsan id et, porttitor.",
           "type": "unstyled",
           "depth": 0,
           "inlineStyleRanges": [
             {
-              "offset": 54,
+              "offset": 47,
               "length": 31,
               "style": "BOLD"
             },
             {
-              "offset": 149,
-              "length": 63,
+              "offset": 105,
+              "length": 40,
               "style": "ITALIC"
             }
           ],
