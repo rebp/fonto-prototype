@@ -147,10 +147,6 @@ class EditorPrototype extends Component {
 			this.setState({ spellCheck: false, isOfflineSaved: true, status: "offline" })
 			this.sendOfflineToast()
 		}
-		else {
-			// TODO: Only if there are offline changes
-			// this.saveDocumentToServerHandler();
-		}
 
 		window.addEventListener('online', e => {
 			this.setState({ status: "online" })
@@ -209,42 +205,41 @@ class EditorPrototype extends Component {
 
 		console.log("isOfflineSaved: ", this.state.isOfflineSaved)
 
-		const data = convertToRaw(this.state.editorState.getCurrentContent())
+		const 	onlineEditor = await axios.get(SERVER),
+				offlineEditor = JSON.parse(localStorage.getItem("offlineSavedDocument")),
 
-		const latestSave = {
-			timestamp: Date.now(),
-			document: { ...data }
-		}
+				serverTimestamp = onlineEditor.data.timestamp,
+				localTimestamp = offlineEditor.timestamp,
+
+				currenteState = convertToRaw(this.state.editorState.getCurrentContent()),
+				latestSave = {
+					timestamp: Date.now(),
+					document: { ...currenteState }
+				}
+
+		let 	editorState = this.state.editorState;
+
 
 		if (this.state.status === "online" && this.state.isOfflineSaved) {
+
 			this.setState({ isOfflineSaved: false })
 
 			setTimeout(async () => {
 
-				const onlineEditor = await axios.get(SERVER)
-				const offlineEditor = JSON.parse(localStorage.getItem("offlineSavedDocument"))
-
-				// TODO: Compare with data
-
-				const serverTimestamp = onlineEditor.data.timestamp,
-					localTimestamp = offlineEditor.timestamp;
-
-
 				if (serverTimestamp > localTimestamp) {
-					console.log("Loading latest document from server and updating local", "SERVER: ",serverTimestamp, "Local: ",localTimestamp)
 
-					const editor = await axios.get(SERVER)
+					console.log("Loading latest document from server. ", "[ SERVER: ", serverTimestamp, "LOCAL: ", localTimestamp, "]")
+					editorState = EditorState.createWithContent(convertFromRaw(onlineEditor.data.document))
 
-					let editorState = EditorState.createWithContent(convertFromRaw(editor.data.document));
-					this.setState({ editorState });
-
-					localStorage.setItem("offlineSavedDocument", JSON.stringify(editor.data.document))
 				} else if (serverTimestamp === localTimestamp) {
-					console.log("No changes made", "SERVER: ",serverTimestamp, "Local: ",localTimestamp)
+					console.log("No changes made",  "[ SERVER: ", serverTimestamp, "LOCAL: ", localTimestamp, "]")
+					editorState = EditorState.createWithContent(convertFromRaw(onlineEditor.data.document))
 				} else {
-					console.log("Loading latest document from local and updating server", "SERVER: ",serverTimestamp, "Local: ",localTimestamp)
+					console.log("Loading latest document from local. ",  "[ SERVER: ", serverTimestamp, "LOCAL: ", localTimestamp, "]")					
 
-					await axios.post(SERVER, latestSave)
+					editorState = EditorState.createWithContent(convertFromRaw(offlineEditor.document))
+					await axios.post(SERVER, offlineEditor)
+					
 					toast.warning("Saved offline changes", {
 						position: "bottom-right",
 						className: css({
@@ -265,14 +260,12 @@ class EditorPrototype extends Component {
 
 		} else if (this.state.status === "online") {
 
-			const editor = await axios.get(SERVER)
+			if ( onlineEditor.data.document !== latestSave.document ) {
 
-			if (JSON.stringify(editor.data.document) !== JSON.stringify(latestSave.document)) {
-
-				localStorage.setItem("offlineSavedDocument", JSON.stringify(latestSave))
 				await axios.post(SERVER, latestSave)
+				localStorage.setItem("offlineSavedDocument", JSON.stringify(latestSave))
 				this.saveAnimationHandler()
-				console.log("Saving Online");
+				console.log("Saving Online and Local");
 
 			} else {
 				console.log("Not Saving Online");
@@ -288,7 +281,7 @@ class EditorPrototype extends Component {
 
 			} else {
 
-				if (localStorage.getItem("offlineSavedDocument") !== JSON.stringify(latestSave)) {
+				if (offlineEditor.document !== latestSave.document) {
 
 					localStorage.setItem("offlineSavedDocument", JSON.stringify(latestSave))
 					this.saveAnimationHandler()
@@ -301,39 +294,40 @@ class EditorPrototype extends Component {
 			}
 		}
 
-
+		this.setState({ editorState });
 	}
 
 	getDocumentFromServerHandler = async () => {
 
-		// TODO: If offline, load from localStorage, or from service worker cache, or else load an empty document or do not show any document?
-		// If offline, and there is no localStorage or service worker cache, then do not show document but a warning:
-		// <StateMessage
-		// 	title="Warning state message"
-		// 	message="Something is not going entirely as planned. You should go check it out!"
-		// 	connotation="warning"
-		// 	visual="warning"
-		// />
+		const 	status = await axios.get(STATUS),
 
-		const status = await axios.get(STATUS)
+				onlineEditor = await axios.get(SERVER),
+				offlineEditor = JSON.parse(localStorage.getItem("offlineSavedDocument")),
 
-		let editorState = this.state.editorState;
+				serverTimestamp = onlineEditor.data.timestamp,
+				localTimestamp = offlineEditor.timestamp
+
+		let 	editorState = this.state.editorState;
 
 		if (status.data.status === "online") {
-			console.log("Loading editor state from server")
-			const editor = await axios.get(SERVER)
-			editorState = EditorState.createWithContent(convertFromRaw(editor.data.document));
 
-
-			// TODO:: compare local with server and always use latest
+				if (serverTimestamp > localTimestamp) {
+					console.log("Loading latest document from server. ", "[ SERVER: ", serverTimestamp, "LOCAL: ", localTimestamp, "]")
+					editorState = EditorState.createWithContent(convertFromRaw(onlineEditor.data.document))
+				} else if (serverTimestamp === localTimestamp) {
+					console.log("No changes made",  "[ SERVER: ", serverTimestamp, "LOCAL: ", localTimestamp, "]")
+					editorState = EditorState.createWithContent(convertFromRaw(onlineEditor.data.document))
+				} else {
+					console.log("Loading latest document from local. ",  "[ SERVER: ", serverTimestamp, "LOCAL: ", localTimestamp, "]")
+					editorState = EditorState.createWithContent(convertFromRaw(offlineEditor.document))
+				}
 
 		} else if (!localStorage.getItem("offlineSavedDocument")) {
 			console.log("Loading new editor from localstorage")
 			editorState = EditorState.createEmpty();
 		} else {
 			console.log("Loading editor state from localstorage")
-			const editor = JSON.parse(localStorage.getItem("offlineSavedDocument"))
-			editorState = EditorState.createWithContent(convertFromRaw(editor.document));
+			editorState = EditorState.createWithContent(convertFromRaw(offlineEditor.document));
 		}
 
 		this.setState({ editorState });
