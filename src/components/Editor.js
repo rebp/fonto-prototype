@@ -8,13 +8,17 @@ import Modal from './Modal';
 
 import { css } from 'glamor';
 
+import Editor from 'draft-js-plugins-editor';
+import createImagePlugin from 'draft-js-image-plugin';
+import 'draft-js-image-plugin/lib/plugin.css';
+
 import {
-	Editor,
 	EditorState,
 	RichUtils,
 	convertFromRaw,
 	convertToRaw,
-	DefaultDraftBlockRenderMap
+	DefaultDraftBlockRenderMap,
+	AtomicBlockUtils
 } from 'draft-js';
 
 import Immutable from 'immutable';
@@ -41,6 +45,8 @@ const styles = {
 		}
 	})
 };
+
+const imagePlugin = createImagePlugin();
 
 const SERVER = "/api/document";
 const STATUS = "/api/editor";
@@ -185,12 +191,36 @@ class EditorPrototype extends Component {
 		}
 	}
 
+	focus = () => {
+		this.editor.focus();
+	};
+
 	toggleInlineStyle = (inlineStyle) => {
 		this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, inlineStyle))
 	}
 
 	toggleHeaderBlockType = (blockType) => {
 		this.onChange(RichUtils.toggleBlockType(this.state.editorState, blockType))
+	}
+
+	addImage = (url) => {
+
+		const contentState = this.state.editorState.getCurrentContent();
+		const contentStateWithEntity = contentState.createEntity('IMAGE', 'IMMUTABLE', { src: url });
+		const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+		const newEditorState = AtomicBlockUtils.insertAtomicBlock(
+			this.state.editorState,
+			entityKey,
+			' '
+		);
+
+		let editorState = EditorState.forceSelection(
+			newEditorState,
+			newEditorState.getCurrentContent().getSelectionAfter()
+		);
+
+		this.setState({editorState})
+
 	}
 
 	saveAnimationHandler = () => {
@@ -205,19 +235,21 @@ class EditorPrototype extends Component {
 
 		console.log("isOfflineSaved: ", this.state.isOfflineSaved)
 
-		const 	onlineEditor = await axios.get(SERVER),
-				offlineEditor = JSON.parse(localStorage.getItem("offlineSavedDocument")),
+		const onlineEditor = await axios.get(SERVER),
+			offlineEditor = JSON.parse(localStorage.getItem("offlineSavedDocument")),
 
-				serverTimestamp = onlineEditor.data.timestamp,
-				localTimestamp = offlineEditor.timestamp,
+			serverTimestamp = onlineEditor.data.timestamp,
+			localTimestamp = offlineEditor.timestamp,
 
-				currenteState = convertToRaw(this.state.editorState.getCurrentContent()),
-				latestSave = {
-					timestamp: Date.now(),
-					document: { ...currenteState }
-				}
+			currenteState = convertToRaw(this.state.editorState.getCurrentContent()),
+			latestSave = {
+				timestamp: Date.now(),
+				document: { ...currenteState }
+			}
 
-		let 	editorState = this.state.editorState;
+		localStorage.setItem("offlineSavedDocument", JSON.stringify(latestSave))
+
+		let editorState = this.state.editorState;
 
 
 		if (this.state.status === "online" && this.state.isOfflineSaved) {
@@ -232,14 +264,14 @@ class EditorPrototype extends Component {
 					editorState = EditorState.createWithContent(convertFromRaw(onlineEditor.data.document))
 
 				} else if (serverTimestamp === localTimestamp) {
-					console.log("No changes made",  "[ SERVER: ", serverTimestamp, "LOCAL: ", localTimestamp, "]")
+					console.log("No changes made", "[ SERVER: ", serverTimestamp, "LOCAL: ", localTimestamp, "]")
 					editorState = EditorState.createWithContent(convertFromRaw(onlineEditor.data.document))
 				} else {
-					console.log("Loading latest document from local. ",  "[ SERVER: ", serverTimestamp, "LOCAL: ", localTimestamp, "]")					
+					console.log("Loading latest document from local. ", "[ SERVER: ", serverTimestamp, "LOCAL: ", localTimestamp, "]")
 
 					editorState = EditorState.createWithContent(convertFromRaw(offlineEditor.document))
 					await axios.post(SERVER, offlineEditor)
-					
+
 					toast.warning("Saved offline changes", {
 						position: "bottom-right",
 						className: css({
@@ -260,7 +292,7 @@ class EditorPrototype extends Component {
 
 		} else if (this.state.status === "online") {
 
-			if ( onlineEditor.data.document !== latestSave.document ) {
+			if (onlineEditor.data.document !== latestSave.document) {
 
 				await axios.post(SERVER, latestSave)
 				localStorage.setItem("offlineSavedDocument", JSON.stringify(latestSave))
@@ -299,28 +331,30 @@ class EditorPrototype extends Component {
 
 	getDocumentFromServerHandler = async () => {
 
-		const 	status = await axios.get(STATUS),
+		const status = await axios.get(STATUS),
 
-				onlineEditor = await axios.get(SERVER),
-				offlineEditor = JSON.parse(localStorage.getItem("offlineSavedDocument")),
+			onlineEditor = await axios.get(SERVER),
+			offlineEditor = JSON.parse(localStorage.getItem("offlineSavedDocument")),
 
-				serverTimestamp = onlineEditor.data.timestamp,
-				localTimestamp = offlineEditor.timestamp
+			serverTimestamp = onlineEditor.data.timestamp,
+			localTimestamp = offlineEditor.timestamp
 
-		let 	editorState = this.state.editorState;
+		let editorState = this.state.editorState;
 
 		if (status.data.status === "online") {
 
-				if (serverTimestamp > localTimestamp) {
-					console.log("Loading latest document from server. ", "[ SERVER: ", serverTimestamp, "LOCAL: ", localTimestamp, "]")
-					editorState = EditorState.createWithContent(convertFromRaw(onlineEditor.data.document))
-				} else if (serverTimestamp === localTimestamp) {
-					console.log("No changes made",  "[ SERVER: ", serverTimestamp, "LOCAL: ", localTimestamp, "]")
-					editorState = EditorState.createWithContent(convertFromRaw(onlineEditor.data.document))
-				} else {
-					console.log("Loading latest document from local. ",  "[ SERVER: ", serverTimestamp, "LOCAL: ", localTimestamp, "]")
-					editorState = EditorState.createWithContent(convertFromRaw(offlineEditor.document))
-				}
+			editorState = EditorState.createWithContent(convertFromRaw(onlineEditor.data.document))
+
+			if (serverTimestamp > localTimestamp) {
+				console.log("Loading latest document from server. ", "[ SERVER: ", serverTimestamp, "LOCAL: ", localTimestamp, "]")
+				editorState = EditorState.createWithContent(convertFromRaw(onlineEditor.data.document))
+			} else if (serverTimestamp === localTimestamp) {
+				console.log("No changes made", "[ SERVER: ", serverTimestamp, "LOCAL: ", localTimestamp, "]")
+				editorState = EditorState.createWithContent(convertFromRaw(onlineEditor.data.document))
+			} else {
+				console.log("Loading latest document from local. ", "[ SERVER: ", serverTimestamp, "LOCAL: ", localTimestamp, "]")
+				editorState = EditorState.createWithContent(convertFromRaw(offlineEditor.document))
+			}
 
 		} else if (!localStorage.getItem("offlineSavedDocument")) {
 			console.log("Loading new editor from localstorage")
@@ -352,10 +386,12 @@ class EditorPrototype extends Component {
 					spellCheck={spellCheck}
 					toggleSpellCheck={this.toggleSpellCheck}
 					toggleHeaderBlockType={this.toggleHeaderBlockType}
+					toggleModal={this.toggleModal}
 					save={this.saveDocumentToServerHandler}
 					undo={() => this.onChange(EditorState.undo(editorState))}
 					redo={() => this.onChange(EditorState.redo(editorState))}
 					isDocumentSave={isDocumentSave}
+					addImage={this.addImage}
 				/>
 				<Flex
 					flex="1"
@@ -365,11 +401,12 @@ class EditorPrototype extends Component {
 				>
 					<div {...styles.editor}>
 						<Editor
-							ref={this.setEditor}
+							ref={(element) => { this.editor = element; }}
 							editorState={editorState}
 							onChange={this.onChange}
 							spellCheck={spellCheck}
 							blockRenderMap={this.extendedBlockRenderMap()}
+							plugins={[imagePlugin]}
 						/>
 					</div>
 				</Flex>
@@ -387,7 +424,7 @@ class EditorPrototype extends Component {
 					autoClose={5000}
 					transition={Slide}
 				/>
-				{this.state.isModalOpen && <Modal toggleModal={this.toggleModal} />}
+				{this.state.isModalOpen && <Modal toggleModal={this.toggleModal} addImage={this.addImage} />}
 			</App>
 		);
 	}
@@ -398,6 +435,7 @@ class EditorPrototype extends Component {
 		setInterval(() => {
 			this.checkFakeNetworkStatus()
 		}, 2000);
+
 	}
 }
 

@@ -86,6 +86,10 @@ class Header extends Component {
 							<Button icon="underline" isSelected={this.props.currentInlineStyle.has("UNDERLINE")} onClick={() => toggleInlineStyle("UNDERLINE")} />
 						</MastheadToolbarButtons>
 
+						<MastheadToolbarButtons>
+							<Button icon="image" label="Insert image" onClick={() => this.props.toggleModal()}/>
+						</MastheadToolbarButtons>
+
 					</MastheadToolbar>
 					<MastheadAlignRight>
 						<Button
