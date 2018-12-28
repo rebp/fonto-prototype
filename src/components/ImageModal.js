@@ -33,44 +33,55 @@ const imagesLisItems = [
 	{
 		id: 0,
 		label: "Christmas",
-		url: "/images/x-mas.jpg"
+		url: "/images/x-mas.jpg",
+		errorTest: false
 	},
 	{
 		id: 1,
 		label: "Dinner",
-		url: "/images/dinner.jpg"
+		url: "/images/dinner.jpg",
+		errorTest: false
 	},
 	{
 		id: 2,
 		label: "Fireworks",
-		url: "/images/fireworks.jpg"
+		url: "/images/fireworks.jpg",
+		errorTest: true
 	},
 	{
 		id: 3,
 		label: "Snow",
-		url: "/images/snow.jpg"
+		url: "/images/snow.jpg",
+		errorTest: false
 	},
 ]
 
-class OfflineModal extends Component {
+class ImageModal extends Component {
 
 	state = { 
 		selectedItemId: null, 
-		url: null 
+		url: null,
+		errorTest: null
 	}
 
 	handleItemClick = item => this.setState({ 
 		selectedItemId: item.id, 
-		url: item.url 
+		url: item.url,
+		errorTest: item.errorTest
 	});
 
 	handleModalClose = () => {
-		this.props.toggleModal()
+		this.props.toggleImageModal()
 	}
 
 	handleModalInsert = () => {
-		this.props.addImage(this.state.url)
-		this.props.toggleModal()
+		if (this.state.errorTest) {
+			this.props.toggleImageModal()
+			this.props.toggleErrorModal()
+		} else {
+			this.props.addImage(this.state.url)
+			this.props.toggleImageModal()
+		}
 	}
 
 	renderItem = ({ item, onClick }) => (
@@ -86,8 +97,7 @@ class OfflineModal extends Component {
 				</Block>
 				<Label>{item.label}</Label>
 			</Flex>
-		</GridItem>
-	
+		</GridItem>	
 	);
 
 	render() {
@@ -121,4 +131,4 @@ class OfflineModal extends Component {
 	}
 }
 
-export default OfflineModal;
+export default ImageModal;

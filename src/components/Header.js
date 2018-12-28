@@ -87,7 +87,7 @@ class Header extends Component {
 						</MastheadToolbarButtons>
 
 						<MastheadToolbarButtons>
-							<Button icon="image" label="Insert image" onClick={() => this.props.toggleModal()}/>
+							<Button icon="image" label="Insert image" onClick={() => this.props.toggleImageModal()}/>
 						</MastheadToolbarButtons>
 
 					</MastheadToolbar>

@@ -4,7 +4,8 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import Header from './Header';
 import BottomStatusbar from './BottomStatusbar';
-import Modal from './Modal';
+import ImageModal from './ImageModal';
+import ErrorModal from './ErrorModal';
 
 import { css } from 'glamor';
 
@@ -60,7 +61,8 @@ class EditorPrototype extends Component {
 		super(props);
 
 		this.state = {
-			isModalOpen: false,
+			isImageModalOpen: false,
+			isErrorModalOpen: false,
 			status: "online",
 			editorState: EditorState.createEmpty(),
 			spellCheck: false,
@@ -170,8 +172,12 @@ class EditorPrototype extends Component {
 		this.setState({ spellCheck: !state })
 	}
 
-	toggleModal = () => {
-		this.setState({ isModalOpen: !this.state.isModalOpen })
+	toggleImageModal = () => {
+		this.setState({ isImageModalOpen: !this.state.isImageModalOpen })
+	}
+
+	toggleErrorModal = () => {
+		this.setState({ isErrorModalOpen: !this.state.isErrorModalOpen })
 	}
 
 	onChange = (editorState) => {
@@ -386,7 +392,7 @@ class EditorPrototype extends Component {
 					spellCheck={spellCheck}
 					toggleSpellCheck={this.toggleSpellCheck}
 					toggleHeaderBlockType={this.toggleHeaderBlockType}
-					toggleModal={this.toggleModal}
+					toggleImageModal={this.toggleImageModal}
 					save={this.saveDocumentToServerHandler}
 					undo={() => this.onChange(EditorState.undo(editorState))}
 					redo={() => this.onChange(EditorState.redo(editorState))}
@@ -424,7 +430,8 @@ class EditorPrototype extends Component {
 					autoClose={5000}
 					transition={Slide}
 				/>
-				{this.state.isModalOpen && <Modal toggleModal={this.toggleModal} addImage={this.addImage} />}
+				{this.state.isImageModalOpen && <ImageModal toggleImageModal={this.toggleImageModal} toggleErrorModal={this.toggleErrorModal} addImage={this.addImage} />}
+				{this.state.isErrorModalOpen && <ErrorModal toggleErrorModal={this.toggleErrorModal} />}
 			</App>
 		);
 	}

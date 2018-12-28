@@ -1,6 +1,6 @@
 {
   "document": {
-    "timestamp": 1545923095901,
+    "timestamp": 1545955809606,
     "document": {
       "blocks": [
         {
@@ -22,7 +22,7 @@
           "data": {}
         },
         {
-          "key": "3hqbf",
+          "key": "g61r",
           "text": "",
           "type": "paragraph",
           "depth": 0,
@@ -31,40 +31,16 @@
           "data": {}
         },
         {
-          "key": "40p8k",
-          "text": " ",
-          "type": "atomic",
-          "depth": 0,
-          "inlineStyleRanges": [],
-          "entityRanges": [
-            {
-              "offset": 0,
-              "length": 1,
-              "key": 0
-            }
-          ],
-          "data": {}
-        },
-        {
-          "key": "1qqqj",
+          "key": "1os6r",
           "text": "",
-          "type": "unstyled",
+          "type": "paragraph",
           "depth": 0,
           "inlineStyleRanges": [],
           "entityRanges": [],
           "data": {}
         },
         {
-          "key": "ffcnv",
-          "text": "",
-          "type": "unstyled",
-          "depth": 0,
-          "inlineStyleRanges": [],
-          "entityRanges": [],
-          "data": {}
-        },
-        {
-          "key": "8um23",
+          "key": "8349d",
           "text": "",
           "type": "unstyled",
           "depth": 0,
@@ -73,15 +49,7 @@
           "data": {}
         }
       ],
-      "entityMap": {
-        "0": {
-          "type": "IMAGE",
-          "mutability": "IMMUTABLE",
-          "data": {
-            "src": "/images/fireworks.jpg"
-          }
-        }
-      }
+      "entityMap": {}
     }
   },
   "editor": {
