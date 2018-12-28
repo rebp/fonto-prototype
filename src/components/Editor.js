@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ToastContainer, toast, Slide, } from 'react-toastify';
+import { ToastContainer, toast, Slide, cssTransition} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import Header from './Header';
@@ -47,6 +47,11 @@ const styles = {
 	})
 };
 
+const SlideInOut = cssTransition({
+	enter: 'slideDown',
+	duration: 5000
+  });
+
 const imagePlugin = createImagePlugin();
 
 const SERVER = "/api/document";
@@ -88,43 +93,89 @@ class EditorPrototype extends Component {
 		return DefaultDraftBlockRenderMap.merge(blockRenderMap);
 	}
 
+	savedOfflineToastRenderer = () => (
+		<Block spaceHorizontalSize="m">
+			<Text colorName="state-message-success-color" align="center">Saved offline changes</Text>
+		</Block>
+	)
+
+	sendSavedOfflineToast = () => {
+		toast.warning(this.savedOfflineToastRenderer, {
+			className: css({
+				background: '#ebf4ec',
+				border: "1px solid #388e3c",
+				position: "fixed",
+				width: "200px",
+				padding: "15px",
+				top: "15px",
+				left: "20px",
+				minHeight: "60px"
+			}),
+			bodyClassName: css({
+				color: "#388e3c",
+				margin: "5px 0px"
+			}),
+			hideProgressBar: true,
+			closeOnClick: true,
+			transition: SlideInOut,
+			toastId: 1
+		});
+	}
+
+	onlineToastRenderer = () => (
+		<Block spaceHorizontalSize="m">
+			<Text colorName="state-message-info-color" align="center">Online</Text>
+		</Block>
+	)
+
 	sendOnlineToast = () => {
 		// navigator.serviceWorker.controller.postMessage("online");
-		toast.info("Online", {
-			position: "bottom-right",
+		toast.info(this.onlineToastRenderer, {
 			className: css({
 				background: '#e8f1fb',
-				border: "1px solid #1976d2"
+				border: "1px solid #1976d2",
+				position: "fixed",
+				width: "200px",
+				padding: "15px",
+				top: "15px",
+				left: "20px",
+				minHeight: "60px"
 			}),
 			bodyClassName: css({
 				color: "#1976d2",
 				margin: "5px 0px"
 			}),
 			hideProgressBar: true,
-			closeOnClick: true,
+			transition: SlideInOut,
 			toastId: 1
 		});
 	}
 
-	offlineToastRenderer = ({ closeToast }) => (
+	offlineToastRenderer = () => (
 		<Block spaceHorizontalSize="m">
-			<Text colorName="icon-s-error-color">Offline</Text>
+			<Text colorName="icon-s-error-color" align="center">Offline</Text>
 		</Block>
 	)
 
 	sendOfflineToast = () => {
 		// navigator.serviceWorker.controller.postMessage("offline");
 		toast.error(this.offlineToastRenderer, {
-			position: "bottom-right",
 			className: css({
 				background: '#fbeaea',
-				border: "1px solid #d32f2f"
+				border: "1px solid #d32f2f",
+				position: "fixed",
+				width: "200px",
+				padding: "15px",
+				top: "15px",
+				left: "20px",
+				minHeight: "60px"
 			}),
 			bodyClassName: css({
 				color: "#d32f2f",
 				margin: "5px 0px"
 			}),
 			hideProgressBar: true,
+			transition: SlideInOut,
 			toastId: 1
 		});
 	}
@@ -197,10 +248,6 @@ class EditorPrototype extends Component {
 		}
 	}
 
-	focus = () => {
-		this.editor.focus();
-	};
-
 	toggleInlineStyle = (inlineStyle) => {
 		this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, inlineStyle))
 	}
@@ -225,7 +272,7 @@ class EditorPrototype extends Component {
 			newEditorState.getCurrentContent().getSelectionAfter()
 		);
 
-		this.setState({editorState})
+		this.setState({ editorState })
 
 	}
 
@@ -278,23 +325,10 @@ class EditorPrototype extends Component {
 					editorState = EditorState.createWithContent(convertFromRaw(offlineEditor.document))
 					await axios.post(SERVER, offlineEditor)
 
-					toast.warning("Saved offline changes", {
-						position: "bottom-right",
-						className: css({
-							background: '#ebf4ec',
-							border: "1px solid #388e3c"
-						}),
-						bodyClassName: css({
-							color: "#388e3c",
-							margin: "5px 0px"
-						}),
-						hideProgressBar: true,
-						closeOnClick: true,
-						toastId: 1
-					});
+					this.sendSavedOfflineToast()
 				}
 
-			}, 5000);
+			}, 5500);
 
 		} else if (this.state.status === "online") {
 
@@ -424,7 +458,8 @@ class EditorPrototype extends Component {
 						padding: "4px",
 						bottom: "40px",
 						right: "10px",
-						minHeight: "0px"
+						minHeight: "0px",
+						zIndex: "1"
 					})}
 					closeButton={false}
 					autoClose={5000}
