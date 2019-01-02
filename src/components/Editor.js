@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { ToastContainer, toast, Slide, cssTransition} from 'react-toastify';
+import { ToastContainer, toast, Slide, cssTransition } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import Header from './Header';
@@ -49,13 +49,17 @@ const styles = {
 
 const SlideInOut = cssTransition({
 	enter: 'slideDown',
+	exit: 'slideUp',
 	duration: 5000
-  });
+});
 
 const imagePlugin = createImagePlugin();
 
-const SERVER = "/api/document";
-const STATUS = "/api/editor";
+// const SERVER = "/api/document";
+// const STATUS = "/api/editor";
+
+const SERVER = "http://api-rebp.nl/api/document";
+const STATUS = "http://api-rebp.nl/api/editor";
 
 
 class EditorPrototype extends Component {
@@ -273,6 +277,10 @@ class EditorPrototype extends Component {
 		);
 
 		this.setState({ editorState })
+		setTimeout(() => {
+			this.saveDocumentToServerHandler()
+			this.saveAnimationHandler()
+		}, 2000)
 
 	}
 
@@ -328,7 +336,7 @@ class EditorPrototype extends Component {
 					this.sendSavedOfflineToast()
 				}
 
-			}, 5500);
+			}, 6000);
 
 		} else if (this.state.status === "online") {
 
@@ -462,7 +470,6 @@ class EditorPrototype extends Component {
 						zIndex: "1"
 					})}
 					closeButton={false}
-					autoClose={5000}
 					transition={Slide}
 				/>
 				{this.state.isImageModalOpen && <ImageModal toggleImageModal={this.toggleImageModal} toggleErrorModal={this.toggleErrorModal} addImage={this.addImage} />}

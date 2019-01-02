@@ -1,38 +1,6 @@
 {
   "document": {
-    "timestamp": 1545999523652,
-    "document": {
-      "blocks": [
-        {
-          "key": "fg8qd",
-          "text": "FontoXML",
-          "type": "header-one",
-          "depth": 0,
-          "inlineStyleRanges": [],
-          "entityRanges": [],
-          "data": {}
-        },
-        {
-          "key": "2k3v0",
-          "text": "Donec rutrum congue eget malesuada. Pellentesque in id orci porta dapibus. Curabitur arcu erat, id imperdiet et, porttitor at sem. Vivamus suscipit tortor eget felis porttitor volutpat. Pellentesque in ipsum id orci porta dapibus. Vestibulum ac diam sit amet quam.",
-          "type": "paragraph",
-          "depth": 0,
-          "inlineStyleRanges": [],
-          "entityRanges": [],
-          "data": {}
-        },
-        {
-          "key": "9tdn5",
-          "text": "",
-          "type": "unstyled",
-          "depth": 0,
-          "inlineStyleRanges": [],
-          "entityRanges": [],
-          "data": {}
-        }
-      ],
-      "entityMap": {}
-    }
+    "status": "offline"
   },
   "editor": {
     "status": "online"

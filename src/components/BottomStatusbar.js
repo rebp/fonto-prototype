@@ -29,16 +29,15 @@ class BottomStatusbar extends Component {
 
 	renderPopover = ({ togglePopover }) => (
 		<Popover>
-			{/* <PopoverHeader title="WARNING" /> */}
 
 			<PopoverBody>
-				<Text>Some functions might not work offline</Text>
+				<Text>Some functions might not work wihile editing offline</Text>
 				<UnorderedList>
 					<UnorderedListItem>
-						<Label isBold={true}>Spell Check</Label><Text>works only offline</Text>
+						<Label isBold={true}>Spell Check</Label><Text>works only online</Text>
 					</UnorderedListItem>
 					<UnorderedListItem>
-						<Label isBold={true}>Save button</Label><Text>works only online. However, the edito saves your changes while working offline</Text>
+						<Label isBold={true}>Save button</Label><Text>works only online. However, the editor saves your changes automatically while working offline</Text>
 					</UnorderedListItem>
 				</UnorderedList>
 			</PopoverBody>

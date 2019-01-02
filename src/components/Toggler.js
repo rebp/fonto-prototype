@@ -3,7 +3,9 @@ import React, { Component } from 'react'
 import { Block } from 'fds/components';
 
 import axios from 'axios';
-const SERVER = "/api/editor";
+
+// const SERVER = "/api/editor";
+const SERVER = "http://api-rebp.nl/api/editor";
 
 class Toggler extends Component {
 

@@ -13,7 +13,8 @@ import {
 	MastheadToolbar,
 	MastheadToolbarButtons,
 	MastheadToolbars,
-	Menu
+	Menu,
+	SpinnerIcon
 } from 'fds/components';
 
 class Header extends Component {
@@ -53,12 +54,42 @@ class Header extends Component {
 
 					<Button icon="repeat" onClick={() => redo()} />
 
-					<Button
-						icon={!isDocumentSave ? "save" : "check"}
-						tooltipContent={status === "offline" ? "The editor saves automatically for you" : null}
-						isDisabled={status === "offline" ? true : false}
-						onClick={() => save()}
-					/>
+
+
+					{status === "online" && !isDocumentSave &&
+
+						<Button
+							icon="save"
+							isDisabled={false}
+							onClick={() => save()}
+						/>
+
+					}
+
+					{status === "online" && isDocumentSave &&
+
+						<SpinnerIcon size="s" />
+
+					}
+
+
+					{status === "offline" && !isDocumentSave &&
+
+						<Button
+							icon="save"
+							isDisabled={true}
+							onClick={() => save()}
+						/>
+
+					}
+
+					{status === "offline" && isDocumentSave &&
+
+						<SpinnerIcon size="s" />
+
+					}
+
+
 
 					<MastheadTabButtons>
 						<Button
@@ -87,7 +118,7 @@ class Header extends Component {
 						</MastheadToolbarButtons>
 
 						<MastheadToolbarButtons>
-							<Button icon="image" label="Insert image" onClick={() => this.props.toggleImageModal()}/>
+							<Button icon="image" label="Insert image" onClick={() => this.props.toggleImageModal()} />
 						</MastheadToolbarButtons>
 
 					</MastheadToolbar>

@@ -8,12 +8,7 @@ import {
 	ModalContent,
 	ModalFooter,
 	ModalHeader,
-	Text,
-	Label,
-	Flex,
-	GridItem,
-	VirtualGrid,
-	ContainedImage
+	Text
 } from 'fds/components';
 
 import {
