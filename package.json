@@ -36,6 +36,7 @@
     "glamor": "^2.20.40",
     "gsap": "^2.0.2",
     "html-webpack-plugin": "4.0.0-alpha.2",
+    "idb": "^3.0.2",
     "identity-obj-proxy": "3.0.0",
     "jest": "23.6.0",
     "jest-pnp-resolver": "1.0.1",
