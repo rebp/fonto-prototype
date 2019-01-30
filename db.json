@@ -1,6 +1,20 @@
 {
   "document": {
-    "status": "offline"
+    "timestamp": 1548858640621,
+    "document": {
+      "blocks": [
+        {
+          "key": "dfkh9",
+          "text": "",
+          "type": "unstyled",
+          "depth": 0,
+          "inlineStyleRanges": [],
+          "entityRanges": [],
+          "data": {}
+        }
+      ],
+      "entityMap": {}
+    }
   },
   "editor": {
     "status": "online"

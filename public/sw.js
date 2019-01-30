@@ -42,14 +42,14 @@ self.addEventListener('fetch', e => {
   );
 });
 
-self.addEventListener('message', function(event){
+// self.addEventListener('message', function(event){
 
-	if (event.data === "online") {
-		console.log("From SW: You are working Online");
-	}
+// 	if (event.data === "online") {
+// 		console.log("From SW: You are working Online");
+// 	}
 
-	if (event.data === "offline") {
-		console.log("From SW: You are working Offline");
-	}
+// 	if (event.data === "offline") {
+// 		console.log("From SW: You are working Offline");
+// 	}
 	
-});
+// });

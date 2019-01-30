@@ -16,12 +16,12 @@ import createImagePlugin from "draft-js-image-plugin";
 import "draft-js-image-plugin/lib/plugin.css";
 
 import {
+  AtomicBlockUtils,
+  DefaultDraftBlockRenderMap,
   EditorState,
   RichUtils,
   convertFromRaw,
-  convertToRaw,
-  DefaultDraftBlockRenderMap,
-  AtomicBlockUtils
+  convertToRaw
 } from "draft-js";
 
 import Immutable from "immutable";
@@ -51,11 +51,11 @@ const SlideInOut = cssTransition({
 
 const imagePlugin = createImagePlugin();
 
-// const SERVER = "/api/document";
-// const STATUS = "/api/editor";
+const SERVER = "/api/document";
+const STATUS = "/api/editor";
 
-const SERVER = "http://api-rebp.nl/api/document";
-const STATUS = "http://api-rebp.nl/api/editor";
+// const SERVER = "http://api-rebp.nl/api/document";
+// const STATUS = "http://api-rebp.nl/api/editor";
 
 class EditorPrototype extends Component {
   changeSaveTimeout = null;
@@ -207,7 +207,7 @@ class EditorPrototype extends Component {
       });
       this.sendOfflineToast();
     }
-    console.log("Status: ", editor.data.status);
+    console.log("Status: ", editor.data.status)
   };
 
   checkNetworkStatus = () => {
@@ -320,6 +320,7 @@ class EditorPrototype extends Component {
     console.log("isOfflineSaved: ", this.state.isOfflineSaved);
 
     const { data: onlineEditor } = await axios.get(SERVER);
+
     const { data: offlineEditor } = await readDataById(
       "fonto",
       "offlineSavedDocument"
@@ -415,6 +416,22 @@ class EditorPrototype extends Component {
     const status = await axios.get(STATUS)
 
     const { data: onlineEditor } = await axios.get(SERVER);
+
+    const checkLocalSavedFiles = await readDataById(
+      "fonto",
+      "offlineSavedDocument"
+    );
+
+    const currenteState = convertToRaw(this.state.editorState.getCurrentContent()),
+    latestSave = {
+      timestamp: Date.now(),
+      document: { ...currenteState }
+    };
+
+    if(!checkLocalSavedFiles) {
+      writeData("fonto", { id: "offlineSavedDocument", data: latestSave });
+    }
+
     const { data: offlineEditor } = await readDataById(
       "fonto",
       "offlineSavedDocument"
@@ -426,6 +443,7 @@ class EditorPrototype extends Component {
     let editorState = this.state.editorState;
 
     if (status.data.status === "online") {
+      
       editorState = EditorState.createWithContent(
         convertFromRaw(onlineEditor.document)
       );
@@ -467,6 +485,7 @@ class EditorPrototype extends Component {
           convertFromRaw(offlineEditor.document)
         );
       }
+      
     } else if (!offlineEditor) {
       console.log("Loading new editor from indexedDB");
       editorState = EditorState.createEmpty();
@@ -482,11 +501,6 @@ class EditorPrototype extends Component {
 
   componentWillMount = async () => {
     this.getDocumentFromServerHandler();
-    const { data: offlineEditor } = await readDataById(
-      "fonto",
-      "offlineSavedDocument"
-    );
-    console.log(offlineEditor);
   };
 
   render() {
